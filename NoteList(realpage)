@@ -4,7 +4,6 @@ import  'package:hazlo/Model/Notes.dart';
 import 'package:hazlo/utils/database_helper.dart';
 import 'dart:async';
 import  'package:sqflite/sqflite.dart';
-
 import 'Calendar.dart';
 
 
