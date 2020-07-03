@@ -34,7 +34,7 @@ class CalendarState extends State<Calendar> {
     Map<DateTime,List<dynamic>> data = {};
      events.forEach((event){
        DateTime date = DateTime(event.eventDate.year,event.eventDate.month,event.eventDate.day,12);
-       if(data[date]  = null )data[date] = [];
+       if(data[date]  == null )data[date] = [];
        data[date].add(event);
  });
 return data;
