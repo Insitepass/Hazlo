@@ -84,7 +84,7 @@ return data;
           alignment: Alignment.center,
           decoration:BoxDecoration(
               color: Theme.of(context).primaryColor,
-          borderRadius:BorderRadius.circular(10.0)),
+          borderRadius:BorderRadius.circular(25.0)),
         child:Text(
           date.day.toString(),
           style: TextStyle(color:Colors.white),
@@ -94,7 +94,7 @@ return data;
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color:Colors.orange,
-          borderRadius: BorderRadius.circular(10.0)),
+          borderRadius: BorderRadius.circular(25.0)),
           child: Text(
           date.day.toString(),
             style: TextStyle(color: Colors.white),
