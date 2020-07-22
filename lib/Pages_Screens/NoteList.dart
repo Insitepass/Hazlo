@@ -38,12 +38,30 @@ class NoteListState extends State<NoteList> {
           automaticallyImplyLeading: false,
           backgroundColor: Color(0xFF005792),
           actions: <Widget>[
+             // user profile button
             IconButton(
-              icon: Icon(Icons.exit_to_app),
-              onPressed: () {},// sign out function
+              icon: Icon(Icons.person),
+              onPressed: () async {
+                getCurrentUser();
+              },
+
             ),
+            // PopupMenu that has signout function
+           PopupMenuButton<String>(
+             onSelected: choiceAction,
+             itemBuilder: (BuildContext context) {
+               return Constants.choices.map((String choice) {
+               return PopupMenuItem<String>(
+                 value:  choice,
+                 child: Text(choice),
+               );
+               }).toList();
+             },
+           ),
+
           ],
         ),
+            
         body: StreamBuilder(
           stream: notesDb.streamList(),
           builder: (BuildContext context, AsyncSnapshot<List<Note>>snapshot) {
@@ -109,6 +127,30 @@ class NoteListState extends State<NoteList> {
     );
 
   }
+  
+  Future<void> choiceAction(String choice) async
+{
+  if(choice == Constants.SignOut)
+    {
+      await _firebaseAuth.signOut();
+      await _googleSignIn.signOut();
+
+      Navigator.push(context, new MaterialPageRoute(
+          builder: (context) => new Login()));
+          print('user Signed Out');
+    }
+
+}
+// getting the current user
+  Future<String> getCurrentUser() async {
+    final FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    final String uid = user.uid.toString();
+    return uid;
+  }
+  
+  
+  
+  
   Future<bool>_confrimDelete(BuildContext context) async {
    return showDialog(
         context: context,
