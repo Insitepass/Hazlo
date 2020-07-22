@@ -29,10 +29,15 @@ class AddNoteState extends State<AddNote> {
   final GlobalKey<ScaffoldState> _key =  new GlobalKey<ScaffoldState>();
   FocusNode _descriptionNode;
   bool _editMode;
+   bool switchControl = false;
+  var textHolder = 'Add to Calendar';
+  bool pressing = false;
+  bool showCard = false;
+  DateTime _eventDate;
+  TimeOfDay time;
 
   get auth => FirebaseAuth.instance;
 
-  get _eventDate => DateTimePicker();
   
 
   @override
@@ -43,6 +48,9 @@ class AddNoteState extends State<AddNote> {
     _titleController = TextEditingController(text: _editMode? widget.note.title:null);
     _descriptionController = TextEditingController(text: _editMode? widget.note.description:null);
     _descriptionNode = FocusNode();
+     _eventDate = DateTime.now();
+    time = TimeOfDay.now();
+
 
   }
   @override
@@ -114,16 +122,40 @@ class AddNoteState extends State<AddNote> {
 
                          ),
                       ),
+                        
+                           // Third Separation Container
 
-
-                         // Third Element Toggle on and off Switch
+                        Container(
+                          padding : EdgeInsets.all(10),
+                        ),
+                        
+                          // Fourth Element Toggle on and off Switch
                         // toggle switch with date picker
-                       Container(
-                         padding : EdgeInsets.all(10),
-                         child : SwitchWidget(),
-                       ),
+                        Column(
 
-                         // Fourth Element Save Button
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+
+                        Text('$textHolder', style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold),),
+                          SizedBox(height: 10.0),
+                          Container(
+                         padding : EdgeInsets.all(10),
+                          child : CustomSwitch(
+                          value: switchControl,
+                          onChanged: toggleSwitch,
+                         activeColor: Colors.blue,
+                            ),
+                            ),
+                          Visibility (
+                          visible : showCard,
+                         child : DateTimePicker(_eventDate)
+
+                             ),
+                             SizedBox(height: 12.0,),
+
+                         // Fifth Element Save Button
                              Container(
                               padding: EdgeInsets.only(top:10.0,bottom: 10.0),
                               child:Row(
@@ -138,60 +170,80 @@ class AddNoteState extends State<AddNote> {
                                 textScaleFactor: 1.5,
                                  ),
                                 onPressed: () async{
+                                   if(_titleController.text.isEmpty){
+                                    _key.currentState.showSnackBar(SnackBar(
+                                      content:Text("Title is required."),
+                                    ));
+                                    return;
+                                  }
+                                  // Switch case statement for adding note or event.
+                                switch(switchControl ==  false){
+                                  case false:
+                                 // Adding Events to Calendar
+                                    final FirebaseUser user = await auth.currentUser();
+                                    final userid = user.uid;
+                                    if(widget.event != null) {
+                                      await eventDBS.updateItem(EventModel(
+                                          id: userid,
+                                          title: _titleController.text,
+                                          description: _descriptionController.text,
+                                          eventDate: widget.event.eventDate
+                                      ));
+                                    }else {
+                                      await eventDBS.createItem(EventModel(
+                                          id: userid,
+                                          title: _titleController.text,
+                                          description: _descriptionController
+                                              .text,
+                                          eventDate: _eventDate
+                                      ));
 
-                                 if(_titleController.text.isEmpty){
-                                   _key.currentState.showSnackBar(SnackBar(
-                                     content:Text("Title is required."),
-                                   ));
-                                   return;
-                                 }
-                                 // adding notes to the firebase collection
-                                 final FirebaseUser user = await auth.currentUser();
-                                 final userid = user.uid;
-                                   Note note = Note(
-                                       id: _editMode ? widget.note.id : null,
-                                       title: _titleController.text,
-                                       description: _descriptionController.text,
-                                       createdAt: DateTime.now(),
-                                       userId: userid
-                                   );
+                                      _key.currentState.showSnackBar(SnackBar(
+                                        content:Text("Event Added "),
+                                      ));
+                                    }
+                                    debugPrint('the switch in on');
+                                    break;
+                                  case true:
+                                  // adding notes to the firebase collection
+                                    final FirebaseUser user = await auth.currentUser();
+                                    final userid = user.uid;
+                                    Note note = Note(
+                                        id: _editMode ? widget.note.id : null,
+                                        title: _titleController.text,
+                                        description: _descriptionController.text,
+                                        createdAt: DateTime.now(),
+                                        userId: userid
+                                    );
+                                    _key.currentState.showSnackBar(SnackBar(
+                                        content:Text("Note saved successfully")
+                                    ));
 
-
-                                   // edit not functionality
-                                   if (_editMode) {
-                                     await notesDb.updateItem(note);
-                                   } else {
-                                     await notesDb.createItem(note);
-                                   }
-                                _key.currentState.showSnackBar(SnackBar(
-                                  content:Text("Note saved successfully")
-                                ));
-                                   // Adding Events to Calendar
-                                 if(widget.note != null) {
-                                   await eventDBS.updateData(widget.note.id,{
-                                     "title":  _titleController.text,
-                                     "description":  _descriptionController.text,
-                                     "event_date": _eventDate
-                                   });
-                                 }else{
-                                   await eventDBS.createItem(EventModel(
-                                       title:  _titleController.text,
-                                       description:  _descriptionController.text,
-                                       eventDate: DateTime.now()
-                                   ));
-                                 }
-                                FocusScope.of(context).requestFocus(FocusNode());
-                                Navigator.pop(context);
-                                _titleController.clear();
-                                _descriptionController.clear();
-                                setState(() {
-                                debugPrint("Save button clicked");
-                                 });
-                                 },
-
-                                 ),
+                                    // edit not functionality
+                                    if (_editMode) {
+                                      await notesDb.updateItem(note);
+                                    } else {
+                                      await notesDb.createItem(note);
+                                    }
+                                    _key.currentState.showSnackBar(SnackBar(
+                                        content:Text("Note  Edited  successfully")
+                                    ));
+                                    FocusScope.of(context).requestFocus(
+                                        FocusNode());
+                                    Navigator.pop(context);
+                                    _titleController.clear();
+                                    _descriptionController.clear();
+                                    setState(() {
+                                      debugPrint("Save button clicked");
+                                    });
+                                    debugPrint('switch is off');
+                                    break;
+                                  default:
+                                    debugPrint('its off currently off');
+                                }
+                                 }),
                                    ),
-
+                             
                                  // Fifth element delete button
                                 Container(width: 5.0,),
                                 Expanded(
@@ -232,26 +284,12 @@ class AddNoteState extends State<AddNote> {
 
 }
 
-
-
-// Toggle Switch class
-class SwitchWidget extends StatefulWidget {
-  @override
-  SwitchWidgetClass createState() => new SwitchWidgetClass();
-}
-class SwitchWidgetClass extends State {
-
-  bool switchControl = false;
-  var textHolder = 'Add to Calendar';
-  bool pressing = false;
-  bool showCard = false;
-
-  void toggleSwitch(bool value) {
+// toggele Switch function. 
+  void toggleSwitch(bool value)  {
     if (switchControl == false) {
       setState(() {
         switchControl = true;
       });
-
       // card will be displayed if the Switch is on.
       setState(() {
         showCard = !showCard;
@@ -263,131 +301,72 @@ class SwitchWidgetClass extends State {
         textHolder = 'Add to Calendar';
 
       });
-    // card will not be displayed if the Switch is off.
+      // card will not be displayed if the Switch is off.
       setState(() {
         showCard = !showCard;
       });
     }
   }
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-
-        children: <Widget>[
-          Text('$textHolder', style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold),),
-          Container(
-
-            padding : EdgeInsets.all(10),
-            child:CustomSwitch(
-              onChanged: toggleSwitch,
-              value: switchControl,
-              activeColor: Colors.blue,
-
-            ),
-
-          ),
-          Visibility(
-              visible : showCard,
-              child : DateTimePicker()
-
-
-          ),
-          SizedBox(height: 12.0,),
-
-
-        ]);
-  }
-  
 }
+
+
 // Date Time Picker class
 class DateTimePicker extends StatefulWidget {
+  DateTimePicker(DateTime eventDate);
+
+
+
   @override
   DateTimePickerState createState() => new DateTimePickerState();
 }
 class DateTimePickerState extends State<DateTimePicker> {
-  DateTime pickedDate;
+  DateTime _eventDate;
   TimeOfDay time;
 
   @override
   void initState() {
     super.initState();
-    pickedDate = DateTime.now();
+    _eventDate = DateTime.now();
     time = TimeOfDay.now();
   }
 
   @override
   Widget build(BuildContext context) {
-   return
+    return
       SingleChildScrollView(
-       child: Column(
-       crossAxisAlignment:CrossAxisAlignment.center,
-         children:<Widget>[
-           Divider(color:Color(0xFF005792),thickness: 1,),
-         ListTile(
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Divider(color: Color(0xFF005792), thickness: 1,),
+                ListTile(
 
-           title:Text("Date: ${pickedDate.year},${pickedDate.month},${pickedDate.day}"),
-           trailing: Icon(Icons.keyboard_arrow_down , color:Color(0xFF005792)),
-           onTap: _pickDate,
+                  title: Text("Date:"),
+                  subtitle: Text(
+                    "${_eventDate.day}/${_eventDate.month}/${_eventDate
+                        .year}"),
+                  trailing: Icon(
+                      Icons.keyboard_arrow_down, color: Color(0xFF005792)),
+                  onTap: () async {
+                    DateTime picked = await showDatePicker(
+                        context: context, initialDate: _eventDate,
+                        firstDate: DateTime(_eventDate.year - 5),
+                        lastDate: DateTime(_eventDate.year + 5));
+                    if (picked != null) {
+                      setState(() {
+                        _eventDate = picked;
+                      });
+                    }
+                  },
 
-         ),
-        Divider(color:Color(0xFF005792),thickness: 1,),
-         ListTile(
-           title: Text("Time: ${time.hour}:${time.minute}"),
-           trailing: Icon(Icons.keyboard_arrow_down,color:Color(0xFF005792)),
-           onTap:_pickTime,
-
-         ),
-           Divider(color:Color(0xFF005792),thickness: 1,),
-       ],
-
-       ),
-     );
-
-  }
-  _pickDate() async{
-
-  DateTime date = await  showDatePicker(
-      context:context,
-      firstDate: DateTime(DateTime.now().year-5),
-      lastDate:DateTime(DateTime.now().year+5),
-    initialDate: pickedDate,
-    );
-
-  if(date = null)
-    setState((){
-      pickedDate = date;
-    });
-  }
-  _pickTime() async {
-    TimeOfDay t = await showTimePicker(context: (context), initialTime: time);
-    if(t = null)
-      setState(() {
-        time = t;
-      });
-  }
-
-}
-class Calender extends StatelessWidget {
-  CalendarpageState createState() => CalendarpageState();
-
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
+                ),
+                Divider(color: Color(0xFF005792), thickness: 1,),
+                // Add Time picker in the future.
+              ]
+          )
+      );
   }
 }
 
-class CalendarpageState {
-}
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
-  }
 
 
 
