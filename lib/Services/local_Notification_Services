@@ -1,0 +1,70 @@
+
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+
+//ignore: camel_case_types
+class localNotificationService {
+  var flutterNotification;
+
+
+  localNotificationService() {
+    flutterNotification = new FlutterLocalNotificationsPlugin();
+
+  }
+
+  getNotificationInstance() {
+    return flutterNotification;
+
+  }
+  
+  void initNotifications() {
+    // these are the details of the notification
+    var androidInitilize = new AndroidInitializationSettings('assets/img/icon_logo_hazlo.png');
+    var iOSinitilize = new IOSInitializationSettings();
+    var initilizationsSettings = new InitializationSettings(androidInitilize,iOSinitilize);
+    flutterNotification.initialize(initilizationsSettings,onSelectNotification: notificationSelected);
+
+  }
+
+  Future<void> showNotificationDaily(
+         int id ,String title,String body, int hour, int minute
+        ) async {
+      var time = new Time(hour,minute,0);
+       await flutterNotification.showDailyAtTime(
+          id,title, body, time, androidDetails());
+       print ('Notification Succesfull Scheduled at ${time.toString()}');
+
+    }
+
+
+
+  androidDetails() {
+    var androidnotificationDetails = AndroidNotificationDetails('Hazlo', 'Event', 'Up coming event',
+        importance: Importance.Max,
+        priority: Priority.High,
+        ticker:'Hazlo'
+    );
+    var iSODetails = new IOSNotificationDetails();
+    var generalNotificationDetails = new NotificationDetails(androidnotificationDetails, iSODetails);
+
+    return generalNotificationDetails;
+
+  }
+
+  Future notificationSelected(String payload) async {
+    print('Notfication clicked');
+    return Future.value(0);
+  }
+
+  Future onDidReceiveLocalNotification (int id, String title, String body, String payload) async {
+    return Future.value(1);
+  }
+
+  void removeReminder(int notificationId) {
+    flutterNotification.cancel(notificationId);
+  }
+
+}
+
+
+
