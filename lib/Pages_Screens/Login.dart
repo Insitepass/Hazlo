@@ -2,6 +2,7 @@
 import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
 import 'package:hazlo/Pages_Screens/Register.dart';
+import 'package:hazlo/Pages_Screens/Password_reset.dart';
 import 'package:hazlo/Services/Authentication.dart';
 import 'NoteList.dart';
 
@@ -14,6 +15,7 @@ class Login extends StatefulWidget {
   const Login({Key key, this.showError}) : super(key: key);
   @override
   State<StatefulWidget> createState() => new _LoginState();
+
 }
 
 class _LoginState extends State<Login> {
@@ -29,7 +31,7 @@ class _LoginState extends State<Login> {
    //text field state
   //String _emailField = '';
   //String _passwordField = '';
- // String _error = '';
+ String _error = '';
 
   @override
    void initState() {
@@ -42,14 +44,15 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-  //final user = Provider.of<AuthService>(context, listen: false);
+ // final user = Provider.of<AuthService>(context);
 
     return Scaffold(
 
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: Center(
          child: Text('Login'),
-    )
+    ),
         ),
         body: Padding(
             padding: EdgeInsets.all(10),
@@ -68,6 +71,7 @@ class _LoginState extends State<Login> {
                           fontSize: 30),
                     )),
 
+                // Email field
                 Container(
                   padding: EdgeInsets.all(10),
                   child: TextFormField(
@@ -86,6 +90,7 @@ class _LoginState extends State<Login> {
                     },
                   ),
                 ),
+                // Password Field
                 Container(
                   padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
                   child: TextFormField(
@@ -105,7 +110,7 @@ class _LoginState extends State<Login> {
                 ),
                 FlatButton(
                   onPressed: (){
-                    //forgot password screen
+                    Navigator.push(context,new MaterialPageRoute(builder: (context) => new password_reset()));
                   },
                   textColor: Color(0xFF005792),
                   child: Text('Forgot Password'),
@@ -120,24 +125,39 @@ class _LoginState extends State<Login> {
                       color: Color(0xFF005792),
                       child: Text('Login'),
                       onPressed: () async {
-                        if (_formKey.currentState.validate()) {
-                          Navigator.push(context, new MaterialPageRoute(
-                              builder: (context) => new NoteList()));
-                          if (!await _auth.signInWithEmailAndPassword(_emailField.text, _passwordField.text))
-                          widget.showError();
-                        } else {
+                        try {
+                          if (_formKey.currentState.validate()) {
+                           final user = await _auth
+                                .signInWithEmailAndPassword(_emailField.text,
+                                _passwordField.text);
+                           if (user != null)
+                             {
+                               Navigator.push(context, new MaterialPageRoute(
+                                   builder: (context) => new NoteList()));
+                             }
+                          } else {
+                            final user = await _auth
+                                .signInWithEmailAndPassword(_emailField.text,
+                                _passwordField.text);
+                           if (user == null) {
+                             setState(() =>
+                             _error =
+                             'could not sign in with those credentials');
+                           }
 
-                          //TODO add else statement maybe dialog
-
+                          }
+                        }
+                        catch (e)
+                        {
+                          print(e.toString());
                         }
                       }
-
                         ),
                      ),
                 Container(
                     child: Row(
                       children: <Widget>[
-                        Text('Does not have account?'),
+                        Text('Don t not have account?'),
                         FlatButton(
                           textColor: Color(0xFF005792),
                           child: Text(
@@ -162,7 +182,8 @@ class _LoginState extends State<Login> {
                  splashColor: Color(0xFF005792),
                  onPressed: () async {
                    if(!await _auth.signInWithGoogle())
-                    print('Some thing went wrong');
+                     showAlertDialog(context);
+                   // print('Some thing went wrong');
                    else {
                      Navigator.push(context, new MaterialPageRoute(
                          builder: (context) => new NoteList()));
@@ -198,3 +219,31 @@ class _LoginState extends State<Login> {
   }
 }
 
+showAlertDialog(BuildContext context) {
+
+  // set up the button
+  Widget okButton = FlatButton(
+    child: Text("OK"),
+    onPressed: () {
+      Navigator.pop(context,false);
+    },
+  );
+
+  // set up the AlertDialog
+  AlertDialog alert = AlertDialog(
+    title: Text("Something Went Wrong",
+      style: TextStyle(fontSize: 16)),
+    content: Text("Unable to sign in, try again later"),
+    actions: [
+      okButton,
+    ],
+  );
+
+  // show the dialog
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
+}
