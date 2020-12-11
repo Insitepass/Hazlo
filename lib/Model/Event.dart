@@ -6,14 +6,16 @@ class EventModel extends DatabaseItem{
   final String title;
   final String description;
   final DateTime eventDate;
+  final String userId;
 
-  EventModel({this.id,this.title, this.description, this.eventDate}):super(id);
+  EventModel({this.id,this.title, this.description, this.eventDate,this.userId}):super(id);
 
   factory EventModel.fromMap(Map data) {
     return EventModel(
       title: data['title'],
       description: data['description'],
       eventDate: data['event_date'],
+      userId:data['Userid'],
     );
   }
   factory EventModel.fromDS(String id, Map<String,dynamic> data) {
@@ -22,6 +24,7 @@ class EventModel extends DatabaseItem{
       title: data['title'],
       description: data['description'],
       eventDate: data['event_date'].toDate(),
+      userId:data['Userid'],
     );
   }
   Map<String,dynamic> toMap() {
@@ -29,7 +32,7 @@ class EventModel extends DatabaseItem{
       "title":title,
       "description": description,
       "event_date":eventDate,
-      "id":id,
+      "userid":userId,
     };
   }
 }
