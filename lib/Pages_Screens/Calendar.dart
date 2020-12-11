@@ -73,11 +73,11 @@ return data;
     todayColor: Color(0xFF005792)
     ),
     startingDayOfWeek: StartingDayOfWeek.monday,
-    onDaySelected: (date,events) {
-        setState((){
+    onDaySelected: (date,events,_) =>  setState((){
           _selectedEvents = events;
-    });
-    },
+    }),
+  
+      // build the calender
         builders: CalendarBuilders(
         selectedDayBuilder: (context, date, events) => Container(
           margin: const EdgeInsets.all(4.0),
