@@ -55,11 +55,19 @@ return data;
         body:StreamBuilder<List<EventModel>>(
           stream: eventDBS.streamList(),
           builder: (context,snapshot) {
-            if(snapshot.hasData){
+            if(snapshot.hasError) return Center(
+              child: Text("unable to load Calendar")
+              );
+            
+            if(!snapshot.hasData){
+              return CircularProgressIndicator();
+            }
+            else {
               List<EventModel> allEvents = snapshot.data;
               if(allEvents.isNotEmpty) {
                 _events = _groupEvents(allEvents);
               }
+          }
           }
 
     return SingleChildScrollView(
