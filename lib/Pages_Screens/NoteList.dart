@@ -37,6 +37,9 @@ class NoteListState extends State<NoteList> {
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   FirebaseUser user;
+  bool isSearching = false;
+  Icon cusIcon = Icon(Icons.search);
+  Widget custSearchBar = Text('Notes');
 
 
   GoogleSignIn get _googleSignIn => GoogleSignIn();
@@ -68,20 +71,33 @@ class NoteListState extends State<NoteList> {
         backgroundColor: Colors.grey.shade300,
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text('Notes'),
-              // TODO   implement note Search  search
-              IconButton(
-                icon: Icon(Icons.search),
-                onPressed: () {
-
-                },
-              ),
-            ],
-          ),
+          title: custSearchBar,
           actions: <Widget>[
+            IconButton(
+                icon: cusIcon,
+                onPressed: () {
+                  setState(() {
+                    if (this.cusIcon.icon == Icons.search) {
+                      this.cusIcon = Icon(Icons.cancel);
+                      this.custSearchBar = TextField(
+                        textInputAction: TextInputAction.go,
+                        decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: "Search Notes"
+                        ),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16.0,
+                        ),
+                      );
+                    }
+                    else {
+                      this.cusIcon = Icon(Icons.search);
+                      this.custSearchBar = Text('Notes');
+                    }
+                  });
+                }),
+            
             // PopupMenu that has signout function
             PopupMenuButton<String>(
               onSelected: choiceAction,
@@ -94,8 +110,8 @@ class NoteListState extends State<NoteList> {
                 }).toList();
               },
             ),
-
-          ],
+            
+            ],
         ),
         // Refresh indicator
         body: RefreshIndicator(
@@ -227,57 +243,4 @@ class NoteListState extends State<NoteList> {
   }
 }
 
-//search function class
-class Search extends SearchDelegate {
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return <Widget>[
-      IconButton(
-        icon: Icon(Icons.close),
-        onPressed: () {
-          query = "";
-        },
 
-      )
-    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.arrow_back),
-      onPressed: () {
-        Navigator.pop(context);
-      },
-    );
-  }
-
-  String selectedResult;
-
-  @override
-  Widget buildResults(BuildContext context) {
-    return Container(
-        child: Center(
-          child: Text(selectedResult),
-        ),
-    );
-  }
-
-  final List<String>notelist;
-  final notes = List<String>.generate(20, (i) => "Items ${i + 1}");
-  Search(this.notelist);
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    List<String> suggestedList = [];
-    query.isEmpty? suggestedList = notelist : suggestedList.addAll(notelist.where(
-        (element) => element.contains(query),
-    ));
-    IconButton(
-      onPressed: () {
-        showSearch(context: context, delegate: Search(notelist));
-      },
-      icon: Icon(Icons.search),
-    );
-  }
-}
