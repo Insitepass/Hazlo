@@ -176,7 +176,7 @@ class NoteListState extends State<NoteList> {
               onPressed: () {
                 // debugPrint('FAB clicked');
                 Navigator.push(context, new MaterialPageRoute(
-                    builder: (context) => new AddNote()));
+                    builder: (context) => new AddNote2()));
               },
               heroTag: null,
               backgroundColor: Color(0xFF005792),
