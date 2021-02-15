@@ -57,6 +57,7 @@ class SettingsPageState extends State<SettingsPage> {
   FirebaseUser user;
    String collection;
    String id;
+   String  _userName;
 
   bool value = true;
 
@@ -64,6 +65,8 @@ class SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     initUser();
+      _getUserName();
+    _showUserName();
   }
 
   initUser() async {
@@ -124,8 +127,7 @@ class SettingsPageState extends State<SettingsPage> {
                                             color: Colors.blueGrey,
                                             size: 35.0
                                         ),
-                                        title: Text("${user?.displayName}"),
-                                        //subtitle:Text("${user?.displayName}") ,
+                                        title:_showUserName() ,
                                       ),
                                       // Display email
                                       ListTile(
@@ -276,6 +278,31 @@ class SettingsPageState extends State<SettingsPage> {
         )
     );
   }
+  
+  Future<void>_getUserName() async {
+    Firestore.instance.collection('users')
+        .document((await FirebaseAuth.instance.currentUser())
+        .uid)
+        .get()
+        .then((value) {
+      setState(() {
+         _userName = value.data['name'].toString();
+      });
+    });
+
+  }
+  // showing the username method.
+ _showUserName(){
+  if(user.displayName == null) {
+    return Text('$_userName');
+  }
+  else if(
+  _userName == null) {
+    return Text("${user?.displayName}");
+  }
+
+  
+  
 
 
 
