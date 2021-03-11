@@ -14,7 +14,7 @@ class EventModel extends DatabaseItem{
     return EventModel(
       title: data['title'],
       description: data['description'],
-      eventDate: data['event_date'],
+      eventDate: DateTime.fromMicrosecondsSinceEpoch(data['eventdate']),
       userId:data['Userid'],
     );
   }
@@ -23,16 +23,16 @@ class EventModel extends DatabaseItem{
       id: id,
       title: data['title'],
       description: data['description'],
-      eventDate: data['event_date'].toDate(),
+      eventDate: DateTime.fromMicrosecondsSinceEpoch(data['eventdate']),
       userId:data['Userid'],
     );
   }
-  Map<String,dynamic> toMap() {
-    return {
+  
+  
+  Map<String,dynamic> toMap() => {
       "title":title,
       "description": description,
-      "event_date":eventDate,
+      "eventdate":eventDate,
       "userid":userId,
     };
-  }
 }
