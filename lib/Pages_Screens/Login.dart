@@ -1,10 +1,13 @@
 
+import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
 import 'package:hazlo/Pages_Screens/Register.dart';
 import 'package:hazlo/Pages_Screens/Password_reset.dart';
 import 'package:hazlo/Services/Authentication.dart';
-import 'NoteList.dart';
+import 'package:hazlo/Widget/BottomNavigator.dart';
+import 'package:connectivity/connectivity.dart';
+
 
 
 
@@ -39,15 +42,17 @@ class _LoginState extends State<Login> {
     _emailField = TextEditingController();
     _passwordField = TextEditingController();
     super.initState();
-
   }
+
+ @override
+ void dispose() {
+    super.dispose();
+ }
 
   @override
   Widget build(BuildContext context) {
- // final user = Provider.of<AuthService>(context);
 
     return Scaffold(
-
         appBar: AppBar(
           automaticallyImplyLeading: false,
           title: Center(
@@ -125,6 +130,7 @@ class _LoginState extends State<Login> {
                       color: Color(0xFF005792),
                       child: Text('Login'),
                       onPressed: () async {
+                        checkInternetConnection();
                         try {
                           if (_formKey.currentState.validate()) {
                            final user = await _auth
@@ -133,7 +139,7 @@ class _LoginState extends State<Login> {
                            if (user != null)
                              {
                                Navigator.push(context, new MaterialPageRoute(
-                                   builder: (context) => new NoteList()));
+                                   builder: (context) => new BottomNavbar()));
                              }
                           } else {
                             final user = await _auth
@@ -152,6 +158,7 @@ class _LoginState extends State<Login> {
                           print(e.toString());
                         }
                       }
+
                         ),
                      ),
                 Container(
@@ -181,13 +188,18 @@ class _LoginState extends State<Login> {
                child:OutlineButton(
                  splashColor: Color(0xFF005792),
                  onPressed: () async {
-                   if(!await _auth.signInWithGoogle())
+                   checkInternetConnection();
+
+                   if(!await _auth.signInWithGoogle()) {
                      showAlertDialog(context);
+
+                   }
                    // print('Some thing went wrong');
                    else {
                      Navigator.push(context, new MaterialPageRoute(
-                         builder: (context) => new NoteList()));
+                         builder: (context) => new BottomNavbar()));
                    }
+
                },
                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
                  highlightElevation: 0,
@@ -219,6 +231,11 @@ class _LoginState extends State<Login> {
   }
 }
 
+
+
+
+
+
 showAlertDialog(BuildContext context) {
 
   // set up the button
@@ -247,3 +264,16 @@ showAlertDialog(BuildContext context) {
     },
   );
 }
+
+// check here
+Future<bool> checkInternetConnection() async {
+  var connectivityResult = await (Connectivity().checkConnectivity());
+  if (connectivityResult == ConnectivityResult.mobile) {
+    return true;
+  } else if (connectivityResult == ConnectivityResult.wifi) {
+    return true;
+  }
+  return false;
+}
+
+
