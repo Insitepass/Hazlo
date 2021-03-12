@@ -311,7 +311,7 @@ class AddNote2State extends State<AddNote2> {
                                       // Datepicker
                                       DatePicker(_eventDate),
                                       //timepicker
-                                      TimePicker(_eventDate)
+                                      TimePicker(time)
 
                                     ],
                                   ),
@@ -540,7 +540,7 @@ class DatePickerState extends State<DatePicker> {
 //time picker class
 class TimePicker extends StatefulWidget {
 
-  TimePicker(DateTime eventDate);
+  TimePicker(TimeofDay time);
 
 
   @override
