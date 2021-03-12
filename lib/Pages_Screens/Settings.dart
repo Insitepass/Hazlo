@@ -1,15 +1,17 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:custom_switch/custom_switch.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:hazlo/Pages_Screens/NoteList.dart';
 import 'package:hazlo/Pages_Screens/Terms_conditions.dart';
 import 'package:hazlo/Services/db_service.dart';
+import 'package:hazlo/Services/local_Notification_Service.dart';
 import 'package:package_info/package_info.dart';
-
+import 'package:rate_my_app/rate_my_app.dart';
 import '../main.dart';
 import 'Login.dart';
+import 'NoteList2.dart';
 
 
 
@@ -65,8 +67,46 @@ class SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     initUser();
-      _getUserName();
+    _getUserName();
     _showUserName();
+
+    _rateMyApp.init().then((_) {
+      if(_rateMyApp.shouldOpenDialog) {
+        _rateMyApp.showStarRateDialog(
+          context,
+          title: " Enjoying the App?",
+          message: 'Please leave a rating',
+          actionsBuilder: (_,stars) {
+            return [
+              FlatButton(
+                child:Text('OK'),
+                onPressed: () async {
+                  print('Thank you for the ' + (stars == null ? '0' : stars.round().toString()) + 'star(s) !');
+                 if(stars !=null && (stars == 4 || stars == 5)) {
+                   // rediect user to playstore to enter reviews
+                 }
+                 else {
+                    // redirect to feedback page
+                   // have to create that I guess
+                 }
+                  await _rateMyApp.callEvent(RateMyAppEventType.rateButtonPressed);
+                  Navigator.pop<RateMyAppDialogButton>(context, RateMyAppDialogButton.rate);
+                },
+              ),
+            ];
+          },
+         // ignoreNativeDialog: Platform.isAndroid,
+          dialogStyle: DialogStyle(
+            titleAlign: TextAlign.center,
+            messageAlign: TextAlign.center,
+            messagePadding: EdgeInsets.only(bottom:20)
+          ),
+          starRatingOptions: StarRatingOptions(),
+          onDismissed: () => _rateMyApp.callEvent(RateMyAppEventType.laterButtonPressed),
+        );
+      }
+
+    });
   }
 
   initUser() async {
@@ -88,7 +128,7 @@ class SettingsPageState extends State<SettingsPage> {
                 icon: Icon(Icons.arrow_back),
                 onPressed: () {
                   Navigator.pop(context,
-                      MaterialPageRoute(builder: (context) => NoteList()));
+                      MaterialPageRoute(builder: (context) => NoteList2()));
                 },
               ),
             ),
@@ -127,7 +167,7 @@ class SettingsPageState extends State<SettingsPage> {
                                             color: Colors.blueGrey,
                                             size: 35.0
                                         ),
-                                        title:_showUserName() ,
+                                        title: _showUserName()
                                       ),
                                       // Display email
                                       ListTile(
@@ -164,7 +204,7 @@ class SettingsPageState extends State<SettingsPage> {
                             ),
                           ),
 
-                          //Displaying name
+
                           Card(
                               elevation: 4.0,
                               child: Column(
@@ -187,7 +227,7 @@ class SettingsPageState extends State<SettingsPage> {
                                   //TODO add dark mode toggle switch in the future here
 
 
-                                  //TODO turn off noticications
+
                                   ListTile(
                                     title: Text("Notifications"),
                                     trailing: Row(
@@ -197,7 +237,9 @@ class SettingsPageState extends State<SettingsPage> {
                                         CustomSwitch(
                                             activeColor: Colors.blueGrey,
                                             value: value,
-                                            onChanged: (value) {}),
+                                            onChanged: (value) {
+                                              _cancelAllNotifications();
+                                            }),
                                       ],
                                     ),
                                   ),
@@ -227,7 +269,9 @@ class SettingsPageState extends State<SettingsPage> {
                                           //Rate us with the link to google play
                                           IconButton(
                                             icon: Icon(Icons.arrow_forward_ios),
-                                            onPressed: () {},
+                                            onPressed: () {
+                                             // _rateMyApp;
+                                            },
                                           ),
                                         ],
                                       ),
@@ -278,7 +322,8 @@ class SettingsPageState extends State<SettingsPage> {
         )
     );
   }
-  
+
+
   Future<void>_getUserName() async {
     Firestore.instance.collection('users')
         .document((await FirebaseAuth.instance.currentUser())
@@ -293,17 +338,14 @@ class SettingsPageState extends State<SettingsPage> {
   }
   // showing the username method.
  _showUserName(){
-  if(user.displayName == null) {
-    return Text('$_userName');
-  }
-  else if(
+  if(
   _userName == null) {
     return Text("${user?.displayName}");
   }
-
-  
-  
-
+  else if(
+    user.displayName == null)
+   return Text('$_userName');
+  }
 
 
 
@@ -365,4 +407,20 @@ class SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  //cancel all notifications
+Future<void> _cancelAllNotifications() async {
+  await flutterLocalNotificationsPlugin.cancelAll();
+}
 
+
+  // rate my app
+
+RateMyApp _rateMyApp = RateMyApp(
+  preferencesPrefix:  'rateMyApp_',
+  minDays: 7,
+  minLaunches: 7,
+  remindDays: 7,
+  remindLaunches: 5,
+  // appStoreIdentifier: '',
+  // googlePlayIdentifier: '',
+);
