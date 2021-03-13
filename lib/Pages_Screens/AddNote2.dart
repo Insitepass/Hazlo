@@ -261,7 +261,7 @@ class AddNote2State extends State<AddNote2> {
                             "Note saved successfully")
                     ));
 
-                // edit not functionality
+                // edit note functionality
                 if (_editMode) {
                   await notesDb.updateItem(note);
                 } else {
