@@ -454,7 +454,7 @@ class AddNote2State extends State<AddNote2> {
 
   // local notification schedular
 void scheduleReminder() async {
-    var scheduledNotificationDateTime = _eventDate;
+    var scheduledNotificationDateTime = DateTime.now().add(Duration(minutes:10));
 
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'Hazlo',
