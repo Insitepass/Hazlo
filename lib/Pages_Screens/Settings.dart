@@ -87,7 +87,8 @@ class SettingsPageState extends State<SettingsPage> {
                  }
                  else {
                     // redirect to feedback page
-                   // have to create that I guess
+                   Navigator.pop(context,
+                       MaterialPageRoute(builder: (context) => new FeedbackPage()))
                  }
                   await _rateMyApp.callEvent(RateMyAppEventType.rateButtonPressed);
                   Navigator.pop<RateMyAppDialogButton>(context, RateMyAppDialogButton.rate);
@@ -262,16 +263,19 @@ class SettingsPageState extends State<SettingsPage> {
                                   children: <Widget>[
                                     //Displaying name
                                     ListTile(
-                                      title: Text("Rate Us"),
+                                      title: Text("FeedBack"),
                                       trailing: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: <Widget>[
-                                          //Rate us with the link to google play
+                                             //feedback page
                                           IconButton(
                                             icon: Icon(Icons.arrow_forward_ios),
                                             onPressed: () {
-                                             // _rateMyApp;
-                                            },
+                                              Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                  builder: (context) {
+                                                    return
+                                                      FeedbackPage();
                                           ),
                                         ],
                                       ),
