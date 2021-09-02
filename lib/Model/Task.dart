@@ -10,23 +10,25 @@ class Task extends DatabaseItem{
 
   Task({this.id, this.taskName,this.date, this.isChecked,this.userId}) : super(id);
 
-  void toggleIsChecked() {
+  void toggleIsChecked(int index) {
     isChecked = !isChecked;
   }
 
   Task.fromDS(String id,Map<String, dynamic> data):
       id =id,
       taskName = data['taskName'],
-      date=data['date']?.toDate(),
-      userId = data['userId'],
+      isChecked = false,
+      date= DateTime.fromMicrosecondsSinceEpoch(data['date']),
+      userid = data['userid'],
       super(id);
 
 
   Map<String, dynamic> toMap() =>
       {
         "taskName": taskName,
+        "isChecked" :false,
         "date": date,
-        "userId": userId,
+        "userid": userid,
       };
 
 
