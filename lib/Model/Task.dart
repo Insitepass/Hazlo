@@ -5,10 +5,10 @@ class Task extends DatabaseItem{
   final String id;
   final String taskName;
   final  DateTime date;
-  final String userId;
+  final String userid;
   bool isChecked;
 
-  Task({this.id, this.taskName,this.date, this.isChecked,this.userId}) : super(id);
+  Task({this.id, this.taskName,this.date, this.isChecked,this.userid}) : super(id);
 
   void toggleIsChecked(int index) {
     isChecked = !isChecked;
