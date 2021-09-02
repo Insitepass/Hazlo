@@ -355,17 +355,22 @@ class SettingsPageState extends State<SettingsPage> {
 
     // confirm account delete dialog
     showAboutDialog(BuildContext context) {
-      FlatButton(
+      TextButton(
         child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              RaisedButton(
+              ElevatedButton(
                 child: Text('Yes'),
                 onPressed: () {
-                DatabaseService(id).deleteAccount(id);
+                 return Navigator.push(context, new MaterialPageRoute(
+                    builder: (context) => new Login()));
+
                 },
               ),
-              RaisedButton(
+              
+              
+              
+               ElevatedButton(
                   child: Text('No'),
                   onPressed: () => Navigator.pop(context,false)
 
@@ -381,12 +386,12 @@ class SettingsPageState extends State<SettingsPage> {
         title: Text("Delete Account?"),
         content: Text("Are you sure you want to delete your account?"),
         actions: [
-          new FlatButton (
+          new TextButton (
 
               onPressed: () async {
                 if (yes == true) {
-                  await DatabaseService(collection).deleteAccount(id);
-                  Navigator.push(context, new MaterialPageRoute(
+                  await DatabaseService(collection).deleteuserAuth();
+                 return Navigator.push(context, new MaterialPageRoute(
                       builder: (context) => new Login()));
                 }
                 else {
@@ -396,7 +401,7 @@ class SettingsPageState extends State<SettingsPage> {
               child: new Text("Yes")
           ),
 
-          new FlatButton(onPressed: () => Navigator.pop(context,false), child: Text("No"))
+          new TextButton(onPressed: () => Navigator.of(context, rootNavigator:true).pop(), child: Text("No"))
         ],
       );
 
