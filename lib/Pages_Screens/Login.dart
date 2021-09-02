@@ -1,13 +1,11 @@
 
-import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
+import 'package:hazlo/Pages_Screens/Loading_Screen.dart';
 import 'package:hazlo/Pages_Screens/Register.dart';
 import 'package:hazlo/Pages_Screens/Password_reset.dart';
 import 'package:hazlo/Services/Authentication.dart';
-import 'package:hazlo/Widget/BottomNavigator.dart';
 import 'package:connectivity/connectivity.dart';
-
 
 
 
