@@ -20,8 +20,6 @@ class NoteList2 extends StatefulWidget {
   const NoteList2({Key key, this.note}) : super(key: key);
 
 
-
-
   @override
   State<StatefulWidget> createState() {
 
@@ -38,10 +36,7 @@ class NoteList2State extends State<NoteList2> {
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   FirebaseUser user;
-  // bool isSearching = false;
-  // Icon cusIcon = Icon(Icons.search);
-  // Widget custSearchBar = Text('Notes');
-
+  
 
   GoogleSignIn get _googleSignIn => GoogleSignIn();
   final _formKey = GlobalKey<FormState>();
@@ -77,11 +72,15 @@ class NoteList2State extends State<NoteList2> {
           actions: <Widget>[
             IconButton(
             icon: Icon(Icons.search),
-            onPressed: () =>
-                showSearch(context: context, delegate: NoteSearch()),
+            onPressed: ()  async {
+              //check here
+              final result = await
+              showSearch<String>(context: context, delegate: NoteSearch()
+              );
+              print(result);
+            }
 
                 ),
-
             // PopupMenu that has signout function
             PopupMenuButton<String>(
               onSelected: choiceAction,
@@ -168,11 +167,11 @@ class NoteList2State extends State<NoteList2> {
               title: Text("Confirm Delete"),
               content: Text("Are you want to delete note?"),
               actions: <Widget>[
-                FlatButton(
+                TextButton(
                   child: Text("No"),
                   onPressed: () => Navigator.pop(context, false),
                 ),
-                FlatButton(
+                TextButton(
                   child: Text("Yes"),
                   onPressed: () => Navigator.pop(context, true),
                 ),
@@ -198,44 +197,47 @@ class NoteList2State extends State<NoteList2> {
 
 
   // search functionality class
-  class NoteSearch extends SearchDelegate<String>{
-  // this is from the searchword class
-   var searchwords = SearchwordState();
+  class NoteSearch extends SearchDelegate<String> {
+    // this is from the searchword class
+    final keywords = Searchword.keywords;
+
+    // final List<String> keywords;
+    final Note note;
+    String result;
+
+
+    NoteSearch({ this.note,});
 
 
     @override
-  List<Widget> buildActions(BuildContext context) {
-    // actions for app bar
-    return [
-      IconButton(icon: Icon(Icons.clear),
-      onPressed:() {
-        query="";
+    List<Widget> buildActions(BuildContext context) {
+      // actions for app bar
+      return [
+        IconButton(icon: Icon(Icons.clear),
+            onPressed: () {
+              query = "";
+            })
+      ];
+    }
 
-
-      })
-    ];
-
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    // leading icon on the left of the app bar
-    return IconButton(
-      icon:AnimatedIcon(
-          icon:AnimatedIcons.menu_arrow,
-          progress: transitionAnimation,
-      ),
+    @override
+    Widget buildLeading(BuildContext context) {
+      // leading icon on the left of the app bar
+      return IconButton(
+          icon: AnimatedIcon(
+            icon: AnimatedIcons.menu_arrow,
+            progress: transitionAnimation,
+          ),
           onPressed: () {
-        close(context,null);
+            close(context, result);
           }
-    );
-  }
+      );
+    }
 
-  @override
-  Widget buildResults(BuildContext context) {
-    //show some result based on the selection
-    return
-      StreamBuilder(
+    @override
+    Widget buildResults(BuildContext context) {
+      //show some result based on the selection
+     return  StreamBuilder(
         stream: notesDb.streamList(),
         builder: (BuildContext context, AsyncSnapshot<List<Note>>snapshot) {
           if (snapshot.hasError) return Center(
@@ -249,9 +251,7 @@ class NoteList2State extends State<NoteList2> {
               itemBuilder: (context, index) {
                 return NoteItem(note: snapshot.data[index],
                   onDelete: (note) async {
-                    if (await _confrimDelete(context)) {
-                      notesDb.removeItem(note.id);
-                    }
+
                   },
                   onTap: (note) =>
                       Navigator.push(context, MaterialPageRoute(
@@ -268,48 +268,28 @@ class NoteList2State extends State<NoteList2> {
           );
         },
       );
+    }
+
+
+    @override
+    Widget buildSuggestions(BuildContext context) {
+      // show when someone searches for something
+
+      final suggestions = keywords.where((keyword) {
+        return keyword.toLowerCase().contains(query.toLowerCase());
+      });
+      return ListView.builder(
+          itemCount: suggestions.length,
+          itemBuilder: (BuildContext context, int index) {
+            return ListTile(
+                title: Text(
+                  suggestions.elementAt(index),
+                ),
+                onTap: () {
+                  query = suggestions.elementAt(index);
+                }
+            );
+          });
+    }
+
   }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    // show when someone searches for something
-
-    return ListView.builder(
-      itemCount: searchwords.keywords.length,
-      itemBuilder: (BuildContext context, int index) =>
-        ListTile(
-      leading:Icon(Icons.search),
-      title: Text(searchwords.keywords[index]
-
-        )
-      )
-
-
-    );
-
-  }
-
-  }
-
-Future<bool> _confrimDelete(BuildContext context) async {
-  return showDialog(
-      context: context,
-      builder: (context) =>
-          AlertDialog(
-            title: Text("Confirm Delete"),
-            content: Text("Are you want to delete note?"),
-            actions: <Widget>[
-              FlatButton(
-                child: Text("No"),
-                onPressed: () => Navigator.pop(context, false),
-              ),
-              FlatButton(
-                child: Text("Yes"),
-                onPressed: () => Navigator.pop(context, true),
-              ),
-            ],
-          )
-
-  );
-}
-
