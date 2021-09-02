@@ -192,15 +192,12 @@ class ShowTasksState extends State<ShowTasks> {
   @override
   void initState() {
     super.initState();
-    taskStream = _db.collection('tasks')
-        .where('userid', isEqualTo: user)
-        .snapshots();
-
-
   }
-
-
-
+  
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -208,8 +205,10 @@ class ShowTasksState extends State<ShowTasks> {
       Expanded(
           child:
           StreamBuilder <QuerySnapshot>(
-            stream: taskStream,
-            builder: (context, snapshot) {
+            stream: taskStream = _db.collection('tasks')
+                .where('userid', isEqualTo: user)
+                .snapshots(),
+            builder: (context, AsyncSnapshot<QuerySnapshot>snapshot) {
               if (snapshot.hasError) return Center(
                 child: Text("Error : unable to return your tasks",
                     style: TextStyle(
@@ -286,9 +285,7 @@ class ShowTasksState extends State<ShowTasks> {
 
 
 
-
-
-
+         
 
 
 
