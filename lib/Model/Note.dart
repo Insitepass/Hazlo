@@ -17,8 +17,8 @@ class Note extends DatabaseItem {
         id=id,
         title=data['title'],
         description=data['description'],
-        userId=data['User_id'],
-        createdAt=data['created_at']?.toDate(),
+        userId=data['Userid'],
+        createdAt=data['createdat']?.toDate(),
         super(id);
 
 
@@ -29,7 +29,7 @@ class Note extends DatabaseItem {
         "title": title,
         "description": description,
         "created_at": createdAt,
-        "user_id": userId,
+        "userid": userId,
       };
 
 
