@@ -165,9 +165,9 @@ class FeedbackPageState extends State<FeedbackPage> {
                     final Email _email = Email(
                       body:  _messageController.text,
                       subject: _titleController.text,
-                      recipients:['Nombuso@busogirl.com'],
-                      cc:['busogirl@gmail.com'],
-                      bcc:['Nombuso.Mthimkhulu@outlook.com'],
+                      recipients:[''],
+                      cc:[''],
+                      bcc:[''],
                       isHTML:false,
                     );
 
