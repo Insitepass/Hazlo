@@ -32,8 +32,6 @@ class _LoginState extends State<Login> {
   TextEditingController _passwordField;
 
    //text field state
-  //String _emailField = '';
-  //String _passwordField = '';
  String _error = '';
 
   @override
@@ -113,60 +111,69 @@ class _LoginState extends State<Login> {
 
                   ),
                 ),
-                FlatButton(
+                TextButton(
                   onPressed: (){
                     Navigator.push(context,new MaterialPageRoute(builder: (context) => new password_reset()));
                   },
-                  textColor: Color(0xFF005792),
                   child: Text('Forgot Password'),
                 ),
 
                 Container(
                     height: 50,
                     padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                    child: RaisedButton(
-                      textColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)),
-                      color: Color(0xFF005792),
-                      child: Text('Login'),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)), ),
+                       child: Text('Login'),
                       onPressed: () async {
-                        checkInternetConnection();
                         try {
-                          if (_formKey.currentState.validate()) {
-                           final user = await _auth
-                                .signInWithEmailAndPassword(_emailField.text,
-                                _passwordField.text);
-                           if (user != null)
-                             {
-                               Navigator.push(context, new MaterialPageRoute(
-                                   builder: (context) => new BottomNavbar()));
-                             }
-                          } else {
-                            final user = await _auth
-                                .signInWithEmailAndPassword(_emailField.text,
-                                _passwordField.text);
-                           if (user == null) {
-                             setState(() =>
-                             _error =
-                             'could not sign in with those credentials');
-                           }
+                              var connectivityResult = await (Connectivity().checkConnectivity());
+                              if (_formKey.currentState.validate()) {
+                                final user = await _auth
+                                    .signInWithEmailAndPassword(_emailField.text,
+                                    _passwordField.text);
 
+                                if (user != null)
+                                {
+                                  Navigator.push(context, new MaterialPageRoute(
+                                      builder: (context) => new LoadScreen()));
+                                }
+
+                              } else {
+                                final user = await _auth
+                                    .signInWithEmailAndPassword(_emailField.text,
+                                    _passwordField.text);
+                                if (user == null) {
+                                  setState(() =>
+                                  _error =
+                                  'could not sign in with those credentials');
+                                  showAlertDialog(context);
+                                }
+                                // check connection
+                                if(connectivityResult == ConnectivityResult.mobile) {
+                                  return true;
+
+                                } else if (connectivityResult == ConnectivityResult.wifi) {
+                                  return true;
+                                }
+                                return ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                    content: Text('No internet connection'),
+                                    duration: Duration(seconds:2)
+                                ));
+
+                              }
+                            }
+                            catch (e)
+                            {
+                              print(e.toString());
+                            }
                           }
-                        }
-                        catch (e)
-                        {
-                          print(e.toString());
-                        }
-                      }
-
                         ),
                      ),
                 Container(
                     child: Row(
                       children: <Widget>[
                         Text('Don t not have account?'),
-                        FlatButton(
-                          textColor: Color(0xFF005792),
+                        TextButton(
                           child: Text(
                             'Sign in',
                             style: TextStyle(fontSize: 20),
@@ -177,8 +184,6 @@ class _LoginState extends State<Login> {
                             ));
                           },
                         ),
-                       // user.Status = Status.Authenticating,
-
                       ],
                     ),
                 ),
@@ -186,50 +191,77 @@ class _LoginState extends State<Login> {
                   height: 50,
                   padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                child:OutlineButton(
-                 splashColor: Color(0xFF005792),
+                 //splashColor: Color(0xFF005792),
                  onPressed: () async {
-                   checkInternetConnection();
+                                try {
+                              var connectivityResult = await (Connectivity().checkConnectivity());
 
-                   if(!await _auth.signInWithGoogle()) {
-                     showAlertDialog(context);
+                              if (!await _auth.signInWithGoogle()) {
+                                showAlertDialog(context);
+                              }
+                              // print('Some thing went wrong');
+                              else {
+                                Navigator.push(context, new MaterialPageRoute(
+                                    builder: (context) => new LoadScreen()));
+                              }
 
-                   }
-                   // print('Some thing went wrong');
-                   else {
-                     Navigator.push(context, new MaterialPageRoute(
-                         builder: (context) => new BottomNavbar()));
-                   }
+                              // check connection
+                              if(connectivityResult == ConnectivityResult.mobile) {
+                                return true;
 
-               },
-                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
-                 highlightElevation: 0,
-                 borderSide: BorderSide(color: Colors.grey),
-                 child: Padding(
-                   padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-                   child: Row(
-                     mainAxisSize: MainAxisSize.min,
-                     mainAxisAlignment: MainAxisAlignment.center,
-                     children: <Widget>[
-                       Image(image: AssetImage("assets/img/google_logo.png"), height: 35.0),
-                       Padding(
-                         padding: const EdgeInsets.only(left: 10),
-                         child: Text(
-                           'Sign in with Google',
-                           style: TextStyle(
-                             fontSize: 20,
-                             color: Colors.grey,
-                           ),
-                         ),
-                       )
-                     ],
-                   ),
-                 ),
-               )
-                ),
-              ],
-            ))));
+                              } else if (connectivityResult == ConnectivityResult.wifi) {
+                                return true;
+                              }
+                               return ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                 content: Text('No internet connection'),
+                                 duration: Duration(seconds:2)
+                               ));
+
+
+                            }
+                            catch (e) {
+                              showAlertDialog(context);
+                              print(e.toString());
+                            }
+                          }
+                          ,
+                          style: OutlinedButton.styleFrom(shape: new  RoundedRectangleBorder(borderRadius: BorderRadius.circular(40),
+                            //TODO add hover with the custom color
+                          ),
+                              side : BorderSide(
+                                  color: Colors.grey
+                              )
+
+                          ),
+
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Image(image: AssetImage("assets/img/google_logo.png"), height: 35.0),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10),
+                                  child: Text(
+                                    'Sign in with Google',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        )
+                    ),
+                  ],
+                ))));
   }
 }
+
+//stop here
 
 
 
@@ -265,15 +297,5 @@ showAlertDialog(BuildContext context) {
   );
 }
 
-// check here
-Future<bool> checkInternetConnection() async {
-  var connectivityResult = await (Connectivity().checkConnectivity());
-  if (connectivityResult == ConnectivityResult.mobile) {
-    return true;
-  } else if (connectivityResult == ConnectivityResult.wifi) {
-    return true;
-  }
-  return false;
-}
 
 
