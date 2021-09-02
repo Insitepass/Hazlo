@@ -20,7 +20,6 @@ class EventModel extends DatabaseItem{
   }
   factory EventModel.fromDS(String id, Map<String,dynamic> data) {
     return EventModel(
-      id: id,
       title: data['title'],
       description: data['description'],
       eventDate: DateTime.fromMicrosecondsSinceEpoch(data['eventdate']),
