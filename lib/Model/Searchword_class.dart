@@ -1,83 +1,47 @@
 import 'package:flutter/cupertino.dart';
 
 
-class Searchword extends StatefulWidget{
+class Searchword extends StatelessWidget{
+  
 
-
-  @override
-  State<StatefulWidget> createState() {
-    return SearchwordState();
-  }
-}
-
-class SearchwordState  extends State<Searchword>{
-
-  List<String> keywords = [
-    "Food",
+  static const keywords = [
     "food",
-    "Cat",
     "cat",
     "dog",
-    "Dog",
     "groceries",
-    "Groceries",
-    "Money",
     "money",
-    "Password",
     "password",
-    "Passwords",
     "passwords",
-    "Notes",
     "notes",
-    "Facebook",
     "facebook",
-    "Email",
     "email",
-    "Account",
     "account",
-    "Dinner",
     "dinner",
     "lunch",
-    "Lunch",
-    "Gmail",
     "gmail",
-    "Yahoo",
     "yahoo",
-    "Transport",
     "transport",
-    "Pay",
     "pay",
-    "Send",
     "send",
     "call",
     "mom",
-    "Mom",
     "Dad",
     "dad",
     "brother",
     "create",
-    "Create",
     "change",
     "Change",
     "alternative",
     "contact",
-    "Contact",
-    "Music",
     "music",
-    "Playlist",
     "playlist",
     "documents",
-    "Documents",
     "document",
-    "Document",
     "pdf",
-    "Pdf",
-    "Signature",
     "signature",
     "Client",
     "client",
     "clients",
-    "Clients",
     "change",
     "Change",
     "clothes",
@@ -161,5 +125,9 @@ class SearchwordState  extends State<Searchword>{
     // TODO: implement build
     throw UnimplementedError();
   }
+
+  
 }
+
+
 
