@@ -5,7 +5,7 @@ import 'package:hazlo/Model/Note.dart';
 import 'package:hazlo/Model/searchword_class.dart';
 import 'package:hazlo/Pages_Screens/AddNote2.dart';
 import 'package:hazlo/Pages_Screens/Login.dart';
-import 'package:hazlo/Pages_Screens/Note_details.dart';
+import 'file:///C:/Hazlo/hazlo/lib/Widget/Note_details.dart';
 import 'package:hazlo/Services/db_service.dart';
 import 'package:hazlo/Widget/Note_item.dart';
 import 'package:hazlo/Widget/Popup_Menu.dart';
