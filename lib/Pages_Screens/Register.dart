@@ -38,7 +38,6 @@ class RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
-    // final user = Provider.of<AuthService>(context);
     return Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
@@ -185,42 +184,45 @@ class RegisterState extends State<Register> {
                 Container(
                   height: 50,
                   padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                  child: RaisedButton(
-                      textColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(30.0)),
-                      color: Color(0xFF005792),
+                  child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          shape: new RoundedRectangleBorder(
+                              borderRadius: new BorderRadius.circular(30.0))
+                      ),
+
                       child: Text('Register'),
                       onPressed: () async {
-                        var user = await FirebaseAuth.instance.currentUser();
+                        await FirebaseAuth.instance.currentUser();
                         try {
                           if (_formKey.currentState.validate()) {
                             if (_confirmPasswordField.text ==
-                                _passwordField.text)
-                              if (!await _auth.registerWithEmailAndPassword(
-                                  _emailField.text, _passwordField.text)) {
-                                widget.showError();
-                              }
+                                _passwordField
+                                    .text)
+                              if (!await _auth
+                                .registerWithEmailAndPassword(
+                                _emailField.text, _passwordField.text)) {
+                              widget.showError();
+                            }
                           } else {
-                            print(
-                                "An error occurred unable to register");
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text('An error occurred unable to register')),
+                            );
+                            print("An error occurred unable to register");
                           }
-                        }
-                        catch (e) {
-                         createRecord();
+                        } catch (e) {
+                          createRecord();
                           print('registration successful');
                           showAboutDialog(context);
                           return false;
                         }
-                      }
-                  ),
+                      }),
                 ),
               ],
             ),
           ),
-
         ));
   }
+
 
   // create Record
   void createRecord() async {
@@ -230,6 +232,7 @@ class RegisterState extends State<Register> {
       'name' : _nameField.text,
       'email': _emailField.text,
       'password':_passwordField.text,
+      'account' : 'Active',
        'uid' : uid
     });
 
@@ -248,7 +251,7 @@ class RegisterState extends State<Register> {
 // message box at the end
   showAboutDialog(BuildContext context) {
     // set up the button
-    FlatButton(
+    TextButton(
       child: Text("OK"),
       onPressed: () {
         Navigator.pop(context, new MaterialPageRoute(
@@ -261,7 +264,7 @@ class RegisterState extends State<Register> {
       title: Text("Register Successful!"),
       content: Text("Welcome to Hazlo, lets get it done."),
       actions: [
-        new FlatButton(onPressed: () {
+        new TextButton(onPressed: () {
           Navigator.push(context, new MaterialPageRoute(
               builder: (context) => new Login()));
         },
