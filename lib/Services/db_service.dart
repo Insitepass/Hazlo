@@ -141,20 +141,21 @@ class DatabaseService<T extends DatabaseItem> {
 
   updateData(String id, Map<String, String> map) {}
 
-  // Delete user account
-  Future<void> deleteAccount(String id) async {
-    var user = await FirebaseAuth.instance.currentUser();
+  // Delete user authentication
+  Future<void> deleteuserAuth()  async {
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
     user.delete();
+
     await _db
-        .collection(collection)
-        .where('userid',isEqualTo: user.uid).getDocuments().then((snapshot) {
-      for (DocumentSnapshot ds in snapshot.documents) {
-        ds.reference.delete();
-      }
-    });
+        .collection('users')
+        .document(user.uid)
+        .updateData({'account': 'inactive'});
+
+
+
   }
 }
-
+  
 
 class QueryArgs {
   final String key;
