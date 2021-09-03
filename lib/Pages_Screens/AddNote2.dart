@@ -6,13 +6,13 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hazlo/Model/Event.dart';
 import 'package:hazlo/Model/Note.dart';
 import 'package:hazlo/Model/Task.dart';
-import 'package:hazlo/Pages_Screens/TaskListView.dart';
 import 'package:hazlo/Services/db_service.dart';
 import 'package:hazlo/Services/event_firestore_service.dart';
 import 'package:hazlo/Services/local_Notification_Service.dart';
 import 'package:hazlo/Services/task_service.dart';
+import 'package:hazlo/Widget/BottomNavigator.dart';
 import 'package:intl/intl.dart';
-import 'Calendar.dart';
+
 
 
 
@@ -58,7 +58,7 @@ class AddNote2State extends State<AddNote2> {
 
 
 
- get eventDate => DatePicker(eventDate);
+// get eventDate => DatePicker(eventDate);
 
   @override
   void initState() {
@@ -149,9 +149,9 @@ class AddNote2State extends State<AddNote2> {
                                         SizedBox(
                                          height: 20,
                                           ),
-                                          RaisedButton(
-                                            color: Color(0xFF005792),
-                                            shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)),
+                                          ElevatedButton(
+                                            style:ElevatedButton.styleFrom(
+                                            shape:  new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)),
                                             child: Text(
                                               "Add Task!",
                                               style: TextStyle(
@@ -160,9 +160,6 @@ class AddNote2State extends State<AddNote2> {
                                               ),
                                             ),
                                             onPressed: () async {
-
-                                              /* un//focus */
-                                             // FocusScope.of(context).unfocus();
                                               // add task function here
                                               final FirebaseUser user = await auth.currentUser();
                                               final userid = user.uid;
@@ -171,6 +168,7 @@ class AddNote2State extends State<AddNote2> {
                                                   Task(
                                                       id: userid,
                                                     taskName: _taskNameController.text,
+                                                    isChecked: isChecked,
                                                     date:chosenDate
                                                   )
                                                 );
@@ -178,21 +176,38 @@ class AddNote2State extends State<AddNote2> {
                                               else {
                                                 await taskDBS.createItem(
                                                     Task(
-                                                        userId:userid,
+                                                        userid:userid,
                                                         taskName: _taskNameController.text,
+                                                         isChecked : isChecked,
                                                         date: chosenDate
                                                     ));
+                                                //Task reminder notification
+                                                showTasksReminder();
                                                 Navigator.push(context, new MaterialPageRoute(
-                                                    builder: (context) => new TaskListview()));
+                                                    builder: (context) => new BottomNavbar()));
                                                  _taskNameController.clear();
                                                 setState(() {
                                                   debugPrint(
                                                       'add task button pressed');
                                                 });
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                SnackBar(
+                                                                  content: Text(
+                                                                      "Task added."),
+                                                                ));
                                               }
 
                                             },
-                                          )
+                                          ),
+                                             TextButton(
+                                                          child: Text('cancel'),
+                                                          onPressed: () {
+                                                            Navigator.pop(
+                                                                context, false);
+                                                          }
+                                                      )
+                                            
+                                            
                                         ]
                                         )
                                       )
@@ -235,11 +250,12 @@ class AddNote2State extends State<AddNote2> {
               child:new Icon(Icons.done),
               onPressed: () async{
                 if (_titleController.text.isEmpty) {
-                  _key.currentState.showSnackBar(
+                   ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
                             "Title is required."),
                       ));
+                  
                   return;
                 }
                 final FirebaseUser user = await auth
@@ -255,27 +271,25 @@ class AddNote2State extends State<AddNote2> {
                     createdAt: DateTime.now(),
                     userId: userid
                 );
-                _key.currentState.showSnackBar(
+                ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                         content: Text(
                             "Note saved successfully")
                     ));
-
                 // edit note functionality
                 if (_editMode) {
                   await notesDb.updateItem(note);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text(
+                              "Note  Edited  successfully")
+                      ));
+
                 } else {
                   await notesDb.createItem(note);
                 }
-                _key.currentState.showSnackBar(
-                    SnackBar(
-                        content: Text(
-                            "Note  Edited  successfully")
-                    ));
-                FocusScope.of(context)
-                    .requestFocus(
-                    FocusNode());
-                Navigator.pop(context);
+                Navigator.push(context, new MaterialPageRoute(
+                    builder: (context) => new BottomNavbar()));
                 _titleController.clear();
                 _descriptionController.clear();
                 setState(() {
@@ -290,103 +304,69 @@ class AddNote2State extends State<AddNote2> {
           key: _key,
           appBar: AppBar(
               title: Text('Add Note'),
-              actions:<Widget>[
+              actions: <Widget>[
                 // add reminder/Events
+                /* removed pop up form for add event, reference github  repository */
                 IconButton(
-                  iconSize: 27.0,
-                  color:Colors.white,
-                  icon:Icon(Icons.add_alert_outlined),
-                  onPressed: () {
-                    showDialog(
-                        context:context,
-                        builder:(BuildContext context) {
-                          return AlertDialog (
-                              scrollable: true,
-                              title: Text('Set Reminder'),
-                              content: Padding (
-                                padding: const EdgeInsets.all(8.0),
-                                child: Form(
-                                  child:Column(
-                                    children: <Widget> [
-                                      // Datepicker
-                                      DatePicker(_eventDate),
-                                      //timepicker
-                                      TimePicker(time)
+                    iconSize: 27.0,
+                    color: Colors.white,
+                    icon: Icon(Icons.add_alert_outlined),
+                    onPressed: () async {
+                      final FirebaseUser user = await auth
+                          .currentUser();
+                      final userid = user.uid;
+                      if (_titleController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  "Title is required."),
+                            ));
+                        return;
+                      }
+                      if (widget.event != null) {
+                        await eventDBS.updateItem(
+                            EventModel(
+                                id: userid,
+                                title: _titleController
+                                    .text,
+                                description: _descriptionController
+                                    .text,
+                                eventDate: widget.event
+                                    .eventDate
+                            ));
+                      } else {
+                        await eventDBS.createItem(
+                            EventModel(
+                                userId: userid,
+                                title: _titleController
+                                    .text,
+                                description: _descriptionController
+                                    .text,
+                                eventDate: _eventDate
+                            ));
 
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              actions: [
-                                FlatButton(
-                                  child: Text("cancel"),
-                                  onPressed: () {
-                                    Navigator.pop(context,false);
-                                  },
-                                ),
-                                RaisedButton(
-                                  child: Text("Set"),
-                                  color:Color(0xFF005792),
-                                  shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)),
-                                  onPressed: () async {
-                                    final FirebaseUser user = await auth
-                                        .currentUser();
-                                    final userid = user.uid;
-                                    if (_titleController.text.isEmpty) {
-                                      _key.currentState.showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                                "Title is required."),
-                                          ));
-                                      return;
-                                    }
-                                    if (widget.event != null) {
-                                      await eventDBS.updateItem(
-                                          EventModel(
-                                              id: userid,
-                                              title: _titleController
-                                                  .text,
-                                              description: _descriptionController
-                                                  .text,
-                                              eventDate: widget.event
-                                                  .eventDate
-                                          ));
-                                    } else {
-                                      await eventDBS.createItem(
-                                          EventModel(
-                                              userId: userid,
-                                              title: _titleController
-                                                  .text,
-                                              description: _descriptionController
-                                                  .text,
-                                              eventDate: _eventDate
-                                          ));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  "Event Added "),
+                            ));
+                        Navigator.push(context, new MaterialPageRoute(
+                            builder: (context) => new BottomNavbar()));
+                      }
 
-                                      _key.currentState.showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                                "Event Added "),
-                                          ));
-                                      Navigator.push(context, new MaterialPageRoute(
-                                          builder: (context) => new Calendar()));
+                      //set notifications
+                      scheduleReminder();
 
-                                      //set notifications
-                                      scheduleReminder();
-                                    }
-                                  },
-                                ),
-                              ]
-                          );
-                        }
-                    );
 
-                    debugPrint(
-                        'add reminder button clicked');
-                  },
-                ),
+                      debugPrint(
+                          'add reminder button clicked');
+                    }
 
-            //backgroundColor: Color(0xFF005792),
-            ]
+                )
+
+
+                //backgroundColor: Color(0xFF005792),
+              ]
           ),
           body: Padding(
             padding: EdgeInsets.all(10),
@@ -452,142 +432,180 @@ class AddNote2State extends State<AddNote2> {
   }
 
 
-  // local notification schedular
-void scheduleReminder() async {
-    var scheduledNotificationDateTime = DateTime.now().add(Duration(minutes:10));
+  // local notification scheduler
+  //TODO find a way to use the timepicker value
+  //TODO see if notifications need to be repeated or not.
+  void scheduleReminder() async {
+    var scheduledNotificationDateTime = DateTime.now().add(
+        Duration(minutes: 30));
 
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'Hazlo',
-        'Events',
+      'Events',
       "Up coming event",
       icon: 'icon_logo_hazlo',
       sound: RawResourceAndroidNotificationSound('hazlo_just_saying'),
       largeIcon: DrawableResourceAndroidBitmap('icon_logo_hazlo'),
+
     );
 
     var iOSPlatformChannelSpecifics = IOSNotificationDetails(
-      sound:'hazlo_just_saying.wav',
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true);
-      var  platformChannelSpecifics = NotificationDetails (
-        androidPlatformChannelSpecifics,iOSPlatformChannelSpecifics);
-      await flutterLocalNotificationsPlugin.schedule(
+        sound: 'hazlo_just_saying.wav',
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true);
+    var platformChannelSpecifics = NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+
+    await flutterLocalNotificationsPlugin.schedule(
         0,
         'Hazlo',
         "Up coming event",
         scheduledNotificationDateTime,
         platformChannelSpecifics);
-
-}
-
   }
 
 
-//datepicker class
-class DatePicker extends StatefulWidget {
+// Task Reminder notifications
+  void showTasksReminder() async {
+    var scheduledNotificationDateTime = DateTime.now().add(
+        Duration(minutes: 30));
 
-  DatePicker(DateTime eventDate);
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'Hazlo',
+      'Tasks',
+      "Tasks to be completed",
+      icon: 'icon_logo_hazlo',
+      sound: RawResourceAndroidNotificationSound('hazlo_just_saying'),
+      largeIcon: DrawableResourceAndroidBitmap('icon_logo_hazlo'),
 
+    );
 
-  @override
-  DatePickerState createState() => new DatePickerState();
-}
-class DatePickerState extends State<DatePicker> {
-  DateTime _eventDate;
-  TimeOfDay time;
- 
-  @override
-  void initState() {
-    super.initState();
-    _eventDate = DateTime.now();
-    time = TimeOfDay.now();
-  }
-  @override
-  Widget build(BuildContext context) {
-    return
-      SingleChildScrollView(
-          child:Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                // Divider(color: Color(0xFF005792), thickness: 1,),
-                ListTile(
-                  title: Text("Date:"),
-                  subtitle: Text(
-                      "${_eventDate.day}/${_eventDate.month}/${_eventDate
-                          .year}"),
-                  trailing: Icon(
-                      Icons.keyboard_arrow_down, color: Color(0xFF005792)),
-                  onTap: () async {
-                    DateTime picked = await showDatePicker(
-                        context: context, initialDate: _eventDate,
-                        firstDate: DateTime(_eventDate.year - 5),
-                        lastDate: DateTime(_eventDate.year + 5));
-                    if (picked != null) {
-                      setState(() {
-                        _eventDate = picked;
-                      });
-                    }
-                  },
-                ),
-                Divider(color: Color(0xFF005792), thickness: 1,),
-              ]
-          )
-      );
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails(
+        sound: 'hazlo_just_saying.wav',
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true);
+    var platformChannelSpecifics = NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+
+    await flutterLocalNotificationsPlugin.schedule(
+        0,
+        'Hazlo',
+        "Task to be completed",
+        scheduledNotificationDateTime,
+        platformChannelSpecifics);
   }
 }
+
+
+//date picker class
+
+// class DatePicker extends StatefulWidget {
+//
+//   DatePicker(DateTime eventDate);
+//
+//
+//   @override
+//   DatePickerState createState() => new DatePickerState();
+// }
+// class DatePickerState extends State<DatePicker> {
+//   DateTime _eventDate;
+//   TimeOfDay time;
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     _eventDate = DateTime.now();
+//     time = TimeOfDay.now();
+//   }
+//   @override
+//   Widget build(BuildContext context) {
+//     return
+//       SingleChildScrollView(
+//           child:Column(
+//               crossAxisAlignment: CrossAxisAlignment.center,
+//               children: <Widget>[
+//                 // Divider(color: Color(0xFF005792), thickness: 1,),
+//                 ListTile(
+//                   title: Text("Date:"),
+//                   subtitle: Text(
+//                       "${_eventDate.day}/${_eventDate.month}/${_eventDate
+//                           .year}"),
+//                   trailing: Icon(
+//                       Icons.keyboard_arrow_down, color: Color(0xFF005792)),
+//                   onTap: () async {
+//                     DateTime picked = await showDatePicker(
+//                         context: context, initialDate: _eventDate,
+//                         firstDate: DateTime(_eventDate.year - 5),
+//                         lastDate: DateTime(_eventDate.year + 5));
+//                     if (picked != null) {
+//                       setState(() {
+//                         _eventDate = picked;
+//                       });
+//                     }
+//                   },
+//                 ),
+//                 Divider(color: Color(0xFF005792), thickness: 1,),
+//               ]
+//           )
+//       );
+//   }
+//}
 
 //time picker class
-class TimePicker extends StatefulWidget {
 
-  TimePicker(TimeofDay time);
+// class TimePicker extends StatefulWidget {
+//
+//   TimePicker(TimeOfDay time);
+//
+//
+//   @override
+//   TimePickerState createState() => new TimePickerState();
+// }
+// class TimePickerState extends State<TimePicker> {
+//
+//   TimeOfDay time;
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//
+//     time = TimeOfDay.now();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return
+//       SingleChildScrollView(
+//           child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.center,
+//               children: <Widget>[
+//                 //  Divider(color: Color(0xFF005792), thickness: 1,),
+//                 ListTile(
+//                     title: Text("Time:"),
+//                     subtitle: Text(" ${time.hour}:${time.minute}"),
+//                     trailing: Icon(
+//                         Icons.keyboard_arrow_down, color: Color(0xFF005792)),
+//                     onTap: () async {
+//                       TimeOfDay T = await showTimePicker(
+//                           context: context, initialTime: time
+//                       );
+//                       if (
+//                       T != null
+//                       )
+//                         setState(() {
+//                           time = T;
+//                         });
+//                     }
+//                 ),
+//                 Divider(color: Color(0xFF005792), thickness: 1,),
+//
+//               ]
+//           )
+//
+//       );
+//   }
+//}
 
-
-  @override
-  TimePickerState createState() => new TimePickerState();
-}
-class TimePickerState extends State<TimePicker> {
-  //DateTime _eventDate;
-  TimeOfDay time;
-
-  @override
-  void initState() {
-    super.initState();
-    //  _eventDate = DateTime.now();
-    time = TimeOfDay.now();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return
-      SingleChildScrollView(
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                //  Divider(color: Color(0xFF005792), thickness: 1,),
-                ListTile(
-                    title: Text("Time:"),
-                    subtitle: Text(" ${time.hour}:${time.minute}"),
-                    trailing: Icon(
-                        Icons.keyboard_arrow_down, color: Color(0xFF005792)),
-                    onTap: () async {
-                      TimeOfDay T = await showTimePicker(
-                          context: context, initialTime: time
-                      );
-                      if (
-                      T != null
-                      )
-                        setState(() {
-                          time = T;
-                        });
-                    }
-                ),
-                Divider(color: Color(0xFF005792), thickness: 1,),
-
-              ]
-          )
-
-      );
-  }
-}
 
