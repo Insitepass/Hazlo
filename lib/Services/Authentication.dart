@@ -8,20 +8,15 @@ import 'package:hazlo/Model/User.dart';
 class AuthService{
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  FirebaseUser _user;
 
   // create user object based on FirebaseUser
   User _userFromFirebaseUser(FirebaseUser user) {
-    return user != null ? User(uid: user.uid) : null;
+    return user != null ? User(uid: user.uid, email: user.email,name: user.displayName) : null;
   }
 
-  // ignore: slash_for_doc_comments
-  /**Stream<User> get user {
-    //return _auth.onAuthStateChanged.map(_userFromFirebaseUser);
-  }
-**/
-
-
-
+ 
 
 // Login in user with email and password
   Future signInWithEmailAndPassword( String _emailField, String _passwordField) async {
@@ -83,35 +78,42 @@ class AuthService{
   signOut() async {
     try{
      await FirebaseAuth.instance.signOut();
-
+      await _googleSignIn.signOut();
+      
     } catch (e) {
-      print(e.toString());
+    print('Failed to signOut' + e.toString());
       return null;
     }
   }
 }
 
-// getting the current userid
-// ignore: slash_for_doc_comments
-/**final FirebaseAuth _auth = FirebaseAuth.instance;
-/getCurrentUser() async {
-  final FirebaseUser user = await _auth.currentUser();
-  final uid = user.uid.toString();
-  // Similarly we can get email as well
-  //final uemail = user.email;
-  print(uid);
-  //print(uemail);
-    }
-  *///
+// isLogging State
 
-// inserts just the user id in  database collection
-/**Future<void> getN
- * oteDoc() async {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final Firestore _firestore = Firestore.instance;
-  FirebaseUser user = await _auth.currentUser();
-  DocumentReference  ref = _firestore.collection('Notes').document(user.uid);
-  return ref.setData({'UID': user.uid});
+Future<bool> isLoggedIn() async {
+    this._user = await _auth.currentUser();
+    if (this._user == null) {
+      return false;
+    }
+    return true;
+
+  }
+
+
+// Reset password
+  Future<void> resetPassword(String _emailField) async {
+    await _auth.sendPasswordResetEmail(email:_emailField.trim());
+  }
+
+// Getting the user Name
+  initializeCurrentUser(AuthService authNotifier) async {
+    FirebaseUser firebaseUser = await FirebaseAuth.instance.currentUser();
+
+    if(firebaseUser !=null) {
+      print(firebaseUser);
+      authNotifier._userFromFirebaseUser(firebaseUser);
+    }
+  }
+
 }
 
- */
+
