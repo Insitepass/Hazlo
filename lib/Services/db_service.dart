@@ -40,7 +40,7 @@ class DatabaseService<T extends DatabaseItem> {
 //look here
   Future<List<T>> getQueryList({List<QueryArgs> args = const[]}) async {
     var user = await FirebaseAuth.instance.currentUser();
-   // var uid = user.uid;
+    // var uid = user.uid;
     CollectionReference collref = _db.collection(collection).where('userid',isEqualTo: user.uid);
     Query ref;
     for (QueryArgs arg in args) {
@@ -59,7 +59,7 @@ class DatabaseService<T extends DatabaseItem> {
         .toList();
   }
 
-  Future<Stream<List<T>>> streamQueryList({List<QueryArgs> args = const [] })async {
+  Future<Stream<List<T>>> streamQueryList({List<QueryArgs> args = const []} )async {
     var user = await FirebaseAuth.instance.currentUser();
     CollectionReference collref = _db.collection(collection).where('userid',isEqualTo: user.uid);
     Query ref;
@@ -74,13 +74,13 @@ class DatabaseService<T extends DatabaseItem> {
     return query.map((snap) =>
         snap.documents.map((doc) => fromDS(doc.documentID, doc.data)).toList());
 
-    
+
   }
 
   Future<List<T>> getListFromTo(String field, DateTime from, DateTime to,
       {List<QueryArgs>
       args = const []}) async {
-     var user = await FirebaseAuth.instance.currentUser();
+    var user = await FirebaseAuth.instance.currentUser();
     // look here
     // var ref = _db.collection(collection)
     //     .orderBy('created_at');
@@ -101,7 +101,7 @@ class DatabaseService<T extends DatabaseItem> {
     var user = await FirebaseAuth.instance.currentUser();
     // var ref = _db.collection(collection)
     //     .orderBy('created_at', descending: false);
-     var ref = _db.collection(collection).where('userid',isEqualTo: user.uid).orderBy(field, descending: false);
+    var ref = _db.collection(collection).where('userid',isEqualTo: user.uid).orderBy(field, descending: false);
     for (QueryArgs arg in args) {
       ref = ref.where(arg.key, isEqualTo: arg.value);
     }
@@ -142,16 +142,31 @@ class DatabaseService<T extends DatabaseItem> {
   updateData(String id, Map<String, String> map) {}
 
   // Delete user account
-  Future<void> deleteAccount(String id) async {
-    var user = await FirebaseAuth.instance.currentUser();
+  // Future<void> deleteAccount(String id) async {
+  //   var user = await FirebaseAuth.instance.currentUser();
+  //   user.delete();
+  //   await _db
+  //       .collection('users')
+  //       .where('userid',isEqualTo: user.uid).getDocuments().then((snapshot) {
+  //     for (DocumentSnapshot ds in snapshot.documents) {
+  //       ds.reference.delete();
+  //     }
+  //   });
+  // }
+
+
+// delete user authentication
+  Future<void> deleteuserAuth() async{
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
     user.delete();
+
     await _db
-        .collection(collection)
-        .where('userid',isEqualTo: user.uid).getDocuments().then((snapshot) {
-      for (DocumentSnapshot ds in snapshot.documents) {
-        ds.reference.delete();
-      }
-    });
+        .collection('users')
+        .document(user.uid)
+        .updateData({'account': 'inactive'});
+
+
+
   }
 }
 
