@@ -1,12 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.hazlo">
+    package="com.busogirl.hazlo">
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.
          In most cases you can leave this as-is, but you if you want to provide
          additional functionality it is fine to subclass or reimplement
          FlutterApplication and put your custom class here. -->
-    
-     <!-- The INTERNET permission is required for development. Specifically,
+
+
+    <!-- The INTERNET permission is required for development. Specifically,
                    flutter needs it to communicate with the running application
                    to allow setting breakpoints, to provide hot reload, etc.
               -->
@@ -15,9 +16,10 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
+
     <application
-        android:name="io.flutter.app.FlutterApplication"
-        android:label="hazlo"
+        android:name=".Application"
+        android:label="Hazlo"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
@@ -28,7 +30,8 @@
             android:windowSoftInputMode="adjustResize"
             android:showWhenLocked="true"
             android:turnScreenOn="true"
-                  >
+            android:allowBackup ="true"
+            >
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues
@@ -46,26 +49,36 @@
               android:name="io.flutter.embedding.android.SplashScreenDrawable"
               android:resource="@drawable/launch_background"
               />
+
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-                 <action android:name="hazlo_event Notification"/>
-                 <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="hazlo_event Notification"/>
+                <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            
-             <!-- this for the push notification of the  firebase messaging -->
+
+            <!-- this for the push notification of the  firebase messaging -->
             <intent-filter>
             <action android:name="FLUTTER_NOTIFICATION_CLICK" />
             <category android:name="android.intent.category.DEFAULT" />
         </intent-filter>
-            
+
+
+
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-          <!-- This for local notification -->
+
+        <!-- Ad mob-->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-9969110115171102~9685797411"/>
+
+        <!-- This for local notification -->
         <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
@@ -74,6 +87,11 @@
         </receiver>
         <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
 
-        
+
     </application>
+
+
+
+
+
 </manifest>
