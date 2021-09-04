@@ -1,26 +1,20 @@
 
-
+import 'package:hazlo/Model/User.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:hazlo/Model/User.dart';
 
 
 class AuthService{
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  FirebaseUser _user;
+
 
   // create user object based on FirebaseUser
   User _userFromFirebaseUser(FirebaseUser user) {
-    return user != null ? User(uid: user.uid) : null;
+    return user != null ? User(uid: user.uid, email: user.email,name: user.displayName) : null;
   }
-
-  // ignore: slash_for_doc_comments
-  /**Stream<User> get user {
-    //return _auth.onAuthStateChanged.map(_userFromFirebaseUser);
-  }
-**/
-
-
 
 
 // Login in user with email and password
@@ -41,6 +35,8 @@ class AuthService{
   Future registerWithEmailAndPassword( String _emailField, String _passwordField) async {
     try {
       AuthResult result = await _auth.createUserWithEmailAndPassword(email: _emailField.trim(), password: _passwordField.trim());
+
+
       FirebaseUser user = result.user;
       return _userFromFirebaseUser(user);
     } catch(e) {
@@ -52,7 +48,6 @@ class AuthService{
   }
 // sign in with google
   Future<bool> signInWithGoogle() async {
-    // TODO guess add get user details
     try {
       final GoogleSignIn _googleSignIn = GoogleSignIn(
         scopes: [
@@ -82,36 +77,89 @@ class AuthService{
   //sign out function
   signOut() async {
     try{
-     await FirebaseAuth.instance.signOut();
+      await FirebaseAuth.instance.signOut();
+      await _googleSignIn.signOut();
 
     } catch (e) {
-      print(e.toString());
+      print('Failed to signOut '+ e.toString());
       return null;
     }
   }
-}
 
-// getting the current userid
-// ignore: slash_for_doc_comments
-/**final FirebaseAuth _auth = FirebaseAuth.instance;
-/getCurrentUser() async {
-  final FirebaseUser user = await _auth.currentUser();
-  final uid = user.uid.toString();
-  // Similarly we can get email as well
-  //final uemail = user.email;
-  print(uid);
-  //print(uemail);
+  // isLogging State
+  Future<bool> isLoggedIn() async {
+    this._user = await _auth.currentUser();
+    if (this._user == null) {
+      return false;
     }
-  *///
+    return true;
 
-// inserts just the user id in  database collection
-/**Future<void> getN
- * oteDoc() async {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final Firestore _firestore = Firestore.instance;
-  FirebaseUser user = await _auth.currentUser();
-  DocumentReference  ref = _firestore.collection('Notes').document(user.uid);
-  return ref.setData({'UID': user.uid});
+  }
+
+
+// Reset password
+  Future<void> resetPassword(String _emailField) async {
+    await _auth.sendPasswordResetEmail(email:_emailField.trim());
+  }
+
+
+
+  // // Delete User
+  // Future deleteUser(String _emailField,String _passwordField) async {
+  //   try{
+  //     FirebaseUser user = await _auth.currentUser();
+  //     AuthCredential credentials = EmailAuthProvider.getCredential(email:_emailField.trim(), password: _passwordField.trim() );
+  //     print(user);
+  //
+  //     AuthResult result = await user.reauthenticateWithCredential(credentials);
+  //     await DatabaseService(result.user.uid).deleteAccount(); // this method is in the db_service.
+  //     await result.user.delete();
+  //     return true;
+  //
+  //   } catch (e) {
+  //     print(e.toString());
+  //     return null;
+  //   }
+  // }
+
+// re-authenticate user
+//   static Future<FirebaseUser> reauthCurrentUser() async {
+//     FirebaseUser fbUser = await FirebaseAuth.instance.currentUser();
+//     // this object holds user email and password needed to make reauth.
+//     FirebaseUser signedUser = FirebaseAuth.instance as FirebaseUser;
+//     AuthCredential credential;
+//
+//     // assumuming that user auth using email & password
+//     credential = EmailAuthProvider.getCredential(
+//         email: signedUser.email,
+//         password: password);
+//
+//     fbUser = (await fbUser.reauthenticateWithCredential( credential )
+//         .catchError((error){ print("FirebaseAuthHelper::reauthCurrentUser $error"); })) as FirebaseUser;
+//     // force reloading...
+//     await fbUser.reload();
+//     return fbUser;
+//   }
+
+
+// Getting the user Name
+  initializeCurrentUser(AuthService authNotifier) async {
+    FirebaseUser firebaseUser = await FirebaseAuth.instance.currentUser();
+
+    if(firebaseUser !=null) {
+      print(firebaseUser);
+      authNotifier._userFromFirebaseUser(firebaseUser);
+    }
+  }
+
 }
 
- */
+
+
+
+
+
+
+
+
+
