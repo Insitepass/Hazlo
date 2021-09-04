@@ -4,6 +4,7 @@ import 'package:custom_switch/custom_switch.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:hazlo/Pages_Screens/Feedback.dart';
 import 'package:hazlo/Pages_Screens/Terms_conditions.dart';
 import 'package:hazlo/Services/db_service.dart';
 import 'package:hazlo/Services/local_Notification_Service.dart';
@@ -19,16 +20,16 @@ import 'NoteList2.dart';
 class Settings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-   return SettingsPage();
+    return SettingsPage();
   }
-  
+
 }
 
 class SettingsPage extends StatefulWidget {
 
-const SettingsPage({
-  Key key, theme, MaterialApp Function( BuildContext context, ThemeData) builder,
-}) : super(key:key);
+  const SettingsPage({
+    Key key, theme, MaterialApp Function( BuildContext context, ThemeData) builder,
+  }) : super(key:key);
 
   @override
   SettingsPageState createState() => SettingsPageState();
@@ -45,21 +46,23 @@ ThemeData darkTheme = ThemeData(
 
 // normal theme
 ThemeData lightTheme = ThemeData(
-  accentColor:  Colors.blueGrey,
-  brightness: Brightness.light,
-  primaryColor: Color(0xFF005792)
+    accentColor:  Colors.blueGrey,
+    brightness: Brightness.light,
+    primaryColor: Color(0xFF005792)
 );
 
 class SettingsPageState extends State<SettingsPage> {
+
+  final GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
 
   String _emailField;
   String _passwordField;
   bool yes = true;
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   FirebaseUser user;
-   String collection;
-   String id;
-   String  _userName;
+  String collection;
+  String id;
+  String  _userName;
 
   bool value = true;
 
@@ -78,29 +81,29 @@ class SettingsPageState extends State<SettingsPage> {
           message: 'Please leave a rating',
           actionsBuilder: (_,stars) {
             return [
-              FlatButton(
+              TextButton(
                 child:Text('OK'),
                 onPressed: () async {
                   print('Thank you for the ' + (stars == null ? '0' : stars.round().toString()) + 'star(s) !');
-                 if(stars !=null && (stars == 4 || stars == 5)) {
-                   // rediect user to playstore to enter reviews
-                 }
-                 else {
+                  if(stars !=null && (stars == 4 || stars == 5)) {
+                    // redirect user to play store to enter reviews
+                  }
+                  else {
                     // redirect to feedback page
-                   Navigator.pop(context,
-                       MaterialPageRoute(builder: (context) => new FeedbackPage()))
-                 }
+                    Navigator.pop(context,
+                        MaterialPageRoute(builder: (context) => new FeedbackPage()));
+                  }
                   await _rateMyApp.callEvent(RateMyAppEventType.rateButtonPressed);
                   Navigator.pop<RateMyAppDialogButton>(context, RateMyAppDialogButton.rate);
                 },
               ),
             ];
           },
-         // ignoreNativeDialog: Platform.isAndroid,
+          // ignoreNativeDialog: Platform.isAndroid,
           dialogStyle: DialogStyle(
-            titleAlign: TextAlign.center,
-            messageAlign: TextAlign.center,
-            messagePadding: EdgeInsets.only(bottom:20)
+              titleAlign: TextAlign.center,
+              messageAlign: TextAlign.center,
+              messagePadding: EdgeInsets.only(bottom:20)
           ),
           starRatingOptions: StarRatingOptions(),
           onDismissed: () => _rateMyApp.callEvent(RateMyAppEventType.laterButtonPressed),
@@ -118,8 +121,9 @@ class SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        //theme: darkThemeEnabled ? darkTheme : lightTheme,
+      //theme: darkThemeEnabled ? darkTheme : lightTheme,
         home: Scaffold(
+            key:_globalKey,
             appBar: AppBar(
               backgroundColor: colorCustom,
               title: Text(
@@ -138,187 +142,198 @@ class SettingsPageState extends State<SettingsPage> {
               padding: EdgeInsets.all(10),
               children: <Widget>[
                 FutureBuilder(
-                  future:PackageInfo.fromPlatform(),
-                  builder:(BuildContext context,
-                  AsyncSnapshot<PackageInfo> snapshot) {
-                    if(snapshot.hasData)
-                      return
-                       Padding(
-                           padding: const EdgeInsets.only(left:8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-
-                        children: [
-                          Padding(padding: EdgeInsets.all(16.0),
-                          child: Text("Account",
-                            style: TextStyle(
-                              fontSize: 18.0,
-                            ),
-                          ),
-                          ),
-
-                          Center(
-                            child: Card(
-                                elevation: 4.0,
-                                child: Column(
-                                    children: <Widget>[
-                                      //Displaying name
-                                      ListTile(
-                                        leading: Icon(Icons.person,
-                                            color: Colors.blueGrey,
-                                            size: 35.0
-                                        ),
-                                        title: _showUserName()
-                                      ),
-                                      // Display email
-                                      ListTile(
-                                        leading: Icon(Icons.email,
-                                            color: Colors.blueGrey,
-                                            size: 35.0
-                                        ),
-                                        title: Text("${user?.email}"),
-                                      ),
-                                      Divider(
-                                          color: Color(0xFF005792), thickness: 1
-                                      ),
-
-                                      // Delete Account button
-                                      ListTile(
-                                        //TODO Delete your whole account or all the collections under your uid
-                                        leading: Icon(Icons.delete_forever,
-                                            color: Colors.blueGrey,
-                                            size: 36.0),
-                                        onTap: () => showAboutDialog(context),
-                                        title: Text("Delete Account"),
-                                      ),
-                                    ]
-                                )
-                            ),
-                          ),
+                    future:PackageInfo.fromPlatform(),
+                    builder:(BuildContext context,
+                        AsyncSnapshot<PackageInfo> snapshot) {
+                      if(snapshot.hasData)
+                        return
                           Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text(
-                              "Display",
-                              style: TextStyle(
-                                fontSize: 18.0,
-                              ),
-                            ),
-                          ),
-
-
-                          Card(
-                              elevation: 4.0,
+                              padding: const EdgeInsets.only(left:8),
                               child: Column(
-                                children: <Widget>[
-                                  // remove ads
-                                   ListTile(
-                                    title: Text('Remove Ads'),
-                                      trailing:Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        GestureDetector(
-                                          onTap: () {},
-                                          child: Image (
-                                         image: AssetImage("assets/img/noad.png"), height: 30.0)
-                                          )
-                                           ]
-                                           ),
+                                crossAxisAlignment: CrossAxisAlignment.start,
+
+                                children: [
+                                  Padding(padding: EdgeInsets.all(16.0),
+                                    child: Text("Account",
+                                      style: TextStyle(
+                                        fontSize: 18.0,
+                                      ),
+                                    ),
+                                  ),
+
+                                  Center(
+                                    child: Card(
+                                        elevation: 4.0,
+                                        child: Column(
+                                            children: <Widget>[
+                                              //Displaying name
+                                              ListTile(
+                                                  leading: Icon(Icons.person,
+                                                      color: Colors.blueGrey,
+                                                      size: 35.0
+                                                  ),
+                                                  title: _showUserName()
+                                              ),
+                                              // Display email
+                                              ListTile(
+                                                leading: Icon(Icons.email,
+                                                    color: Colors.blueGrey,
+                                                    size: 35.0
+                                                ),
+                                                title: Text("${user?.email}"),
+                                              ),
+                                              Divider(
+                                                  color: Color(0xFF005792), thickness: 1
+                                              ),
+
+                                              // Delete Account button
+                                              ListTile(
+                                                //TODO Delete your whole account or all the collections under your uid
+                                                leading: Icon(Icons.delete_forever,
+                                                    color: Colors.blueGrey,
+                                                    size: 36.0),
+                                                onTap: () => showAboutDialog(context),
+                                                title: Text("Delete Account"),
+                                              ),
+                                            ]
+                                        )
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: Text(
+                                      "Display",
+                                      style: TextStyle(
+                                        fontSize: 18.0,
+                                      ),
+                                    ),
+                                  ),
+
+
+                                  Card(
+                                      elevation: 4.0,
+                                      child: Column(
+                                        children: <Widget>[
+                                          // remove ads
+                                          ListTile(
+                                            title: Text('Remove Ads'),
+                                            trailing:Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: <Widget>[
+                                                  GestureDetector(
+                                                    // TODO remove ads
+                                                      onTap: () {
+                                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                                            content: Text('Service currently unavailable.')
+                                                        ));
+                                                      },
+                                                      child: Image (
+                                                          image: AssetImage("assets/img/noad.png"), height: 30.0)
+                                                  )
+                                                ]
+                                            ),
                                           ),
 
-                                  //TODO add dark mode toggle switch in the future here
+                                          //TODO add dark mode toggle switch in the future here
 
 
 
-                                  ListTile(
-                                    title: Text("Notifications"),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        //Notifications toggle switch
-                                        CustomSwitch(
-                                            activeColor: Colors.blueGrey,
-                                            value: value,
-                                            onChanged: (value) {
-                                              _cancelAllNotifications();
-                                            }),
-                                      ],
+                                          // stop receiving notifications
+                                          ListTile(
+                                            title: Text("Notifications"),
+                                            trailing: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                //Notifications toggle switch
+                                                CustomSwitch(
+                                                    activeColor: Colors.blueGrey,
+                                                    value: value,
+                                                    onChanged: (value) {
+                                                      _cancelAllNotifications();
+                                                    }),
+                                              ],
+                                            ),
+                                          ),
+
+                                        ],
+                                      )
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: Text(
+                                      "More",
+                                      style: TextStyle(
+                                        fontSize: 18.0,
+                                      ),
                                     ),
+                                  ),
+                                  Card(
+                                      elevation: 4.0,
+                                      child: Column(
+                                          children: <Widget>[
+                                            //Displaying name
+                                            ListTile(
+                                              title: Text("FeedBack"),
+                                              trailing: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: <Widget>[
+                                                  //feedback page
+                                                  IconButton(
+                                                      icon: Icon(Icons.arrow_forward_ios),
+                                                      onPressed: () {
+                                                        Navigator.of(context).push(
+                                                          MaterialPageRoute(
+                                                            builder: (context) {
+                                                              return
+                                                                FeedbackPage();
+                                                              // _rateMyApp;
+                                                            },
+                                                          ),
+                                                        );
+                                                      }
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            // Terms and conditions
+                                            ListTile(
+                                              leading:Text("Terms and Conditions"),
+                                              trailing: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: <Widget>[
+                                                  //Terms and Conditions
+                                                  IconButton(
+                                                    icon: Icon(Icons.arrow_forward_ios),
+                                                    onPressed: () {
+                                                      Navigator.push(context, new MaterialPageRoute(
+                                                          builder: (context) => new TermsandConditionsPage()));
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            ListTile(
+                                              title: Text("About"),
+                                              trailing: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: <Widget>[
+                                                  //version
+                                                  Text(snapshot.data.version
+
+                                                  ),
+                                                ],
+                                              ),
+                                            )
+                                          ]
+                                      )
                                   ),
 
                                 ],
                               )
-                          ),
-                          Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text(
-                              "More",
-                              style: TextStyle(
-                                fontSize: 18.0,
-                              ),
-                            ),
-                          ),
-                          Card(
-                              elevation: 4.0,
-                              child: Column(
-                                  children: <Widget>[
-                                    //Displaying name
-                                    ListTile(
-                                      title: Text("FeedBack"),
-                                      trailing: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: <Widget>[
-                                             //feedback page
-                                          IconButton(
-                                            icon: Icon(Icons.arrow_forward_ios),
-                                            onPressed: () {
-                                              Navigator.of(context).push(
-                                                MaterialPageRoute(
-                                                  builder: (context) {
-                                                    return
-                                                      FeedbackPage();
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    // Terms and conditions
-                                    ListTile(
-                                      leading:Text("Terms and Conditions"),
-                                      trailing: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: <Widget>[
-                                          //Terms and Conditions
-                                          IconButton(
-                                            icon: Icon(Icons.arrow_forward_ios),
-                                            onPressed: () {
-                                              Navigator.push(context, new MaterialPageRoute(
-                                                  builder: (context) => new TermsandConditionsPage()));
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    ListTile(
-                                      title: Text("About"),
-                                      trailing: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: <Widget>[
-                                          //version
-                                          Text(snapshot.data.version
+                          );
 
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  ]
-                              )
-                          ),
-
-                        ],
-                        )
-                      );
-
-                    return Container();
-                  }
+                      return Container();
+                    }
                 ),
                 // Account Card
               ],
@@ -335,90 +350,94 @@ class SettingsPageState extends State<SettingsPage> {
         .get()
         .then((value) {
       setState(() {
-         _userName = value.data['name'].toString();
+        _userName = value.data['name'].toString();
       });
     });
 
   }
   // showing the username method.
- _showUserName(){
-  if(
-  _userName == null) {
-    return Text("${user?.displayName}");
-  }
-  else if(
-    user.displayName == null)
-   return Text('$_userName');
-  }
-
-
-
-    // confirm account delete dialog
-    showAboutDialog(BuildContext context) {
-      FlatButton(
-        child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              RaisedButton(
-                child: Text('Yes'),
-                onPressed: () {
-                DatabaseService(id).deleteAccount(id);
-                },
-              ),
-              RaisedButton(
-                  child: Text('No'),
-                  onPressed: () => Navigator.pop(context,false)
-
-
-              ),
-            ]
-        ),
-        onPressed: () {},
-      );
-
-
-      AlertDialog alert = AlertDialog(
-        title: Text("Delete Account?"),
-        content: Text("Are you sure you want to delete your account?"),
-        actions: [
-          new FlatButton (
-
-              onPressed: () async {
-                if (yes == true) {
-                  await DatabaseService(collection).deleteAccount(id);
-                  Navigator.push(context, new MaterialPageRoute(
-                      builder: (context) => new Login()));
-                }
-                else {
-                  print("Sorry an error occurred");
-                }
-              },
-              child: new Text("Yes")
-          ),
-
-          new FlatButton(onPressed: () => Navigator.pop(context,false), child: Text("No"))
-        ],
-      );
-
-
-      showDialog(context: context,
-        barrierDismissible: false, // user must tap button!
-        builder: (BuildContext context) {
-          return alert;
-        },
-
-      );
+  _showUserName(){
+    if(
+    _userName == null) {
+      return Text("${user?.displayName}");
     }
+    else if(
+    user.displayName == null)
+      return Text('$_userName');
   }
 
-  //cancel all notifications
+
+
+  // confirm account delete dialog
+  showAboutDialog(BuildContext context) {
+
+    TextButton(
+      child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            ElevatedButton(
+              child: Text('Yes'),
+              onPressed: () {
+                //   AuthService.reauthCurrentUser();
+                // DatabaseService(id).deleteAccount(id);
+                return Navigator.push(context, new MaterialPageRoute(
+                    builder: (context) => new Login()));
+
+              },
+            ),
+            ElevatedButton(
+                child: Text('No'),
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                }
+            ),
+          ]
+      ),
+      onPressed: () {},
+    );
+
+
+    AlertDialog alert = AlertDialog(
+      title: Text("Delete Account?"),
+      content: Text("Are you sure you want to delete your account?"),
+      actions: [
+        new TextButton (
+
+            onPressed: () async {
+              if (yes == true) {
+                await DatabaseService(collection).deleteuserAuth();
+                return Navigator.push(context, new MaterialPageRoute(
+                    builder: (context) => new Login()));
+              }
+              else {
+                print("Sorry an error occurred");
+              }
+            },
+            child: new Text("Yes")
+        ),
+
+        new TextButton(onPressed: () =>  Navigator.of(context, rootNavigator:true).pop(), child: Text("No"))
+      ],
+    );
+
+
+    showDialog(context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (context) {
+        return alert;
+      },
+
+    );
+  }
+}
+
+//cancel all notifications
 Future<void> _cancelAllNotifications() async {
   await flutterLocalNotificationsPlugin.cancelAll();
 }
 
 
-  // rate my app
-
+// rate my app
 RateMyApp _rateMyApp = RateMyApp(
   preferencesPrefix:  'rateMyApp_',
   minDays: 7,
