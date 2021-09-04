@@ -4,27 +4,16 @@ import 'package:hazlo/Services/Authentication.dart';
 
 import 'Login.dart';
 
-
-
-
 // ignore: camel_case_types
 class password_reset extends StatefulWidget {
-
-
   @override
   State<StatefulWidget> createState() => _PasswordState();
-
-
-  }
-
-
-
+}
 
 class _PasswordState extends State<password_reset> {
   TextEditingController _emailField;
   final _formKey = GlobalKey<FormState>();
   final AuthService _auth = AuthService();
-
 
   @override
   void initState() {
@@ -32,15 +21,12 @@ class _PasswordState extends State<password_reset> {
     super.initState();
   }
 
-
   @override
   Widget build(BuildContext context) {
-    //TODO build password reset form and add functionlity
     return Scaffold(
       appBar: AppBar(
         title: Center(
           child: Text('Rest Password'),
-
         ),
       ),
       body: Padding(
@@ -82,19 +68,18 @@ class _PasswordState extends State<password_reset> {
                   Container(
                     height: 50,
                     padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                    child: RaisedButton(
-                      textColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(30.0)),
-                      color: Color(0xFF005792),
+                    child: ElevatedButton(
+                      style:ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: new BorderRadius.circular(30.0)),
+                      ),
                       child: Text('Send reset link'),
                       onPressed: () async {
                         if (_formKey.currentState.validate()) {
-                           showAboutDialog(context);
+                          showAboutDialog(context);
                           try {
                             await _auth.resetPassword(_emailField.text);
-                          }
-                          catch (e) {
+                          } catch (e) {
                             print(e);
                           }
                         }
@@ -102,38 +87,34 @@ class _PasswordState extends State<password_reset> {
                     ),
                   )
                 ],
-              )
-          )
-      ),
+              ))),
     );
   }
-
 
   // message box at the end
   showAboutDialog(BuildContext context) {
     // set up the button
-    FlatButton(
+    TextButton(
       child: Text("OK"),
       onPressed: () {
-        Navigator.pop(context, new MaterialPageRoute(
-            builder: (context) => new Login()));
+        Navigator.pop(
+            context, new MaterialPageRoute(builder: (context) => new Login()));
       },
     );
-
 
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
       title: Text("Reset Link set to your email"),
-      content: Text(
-          "Hang tight the link is on the way!"),
+      content: Text("Hang tight the link is on the way!"),
       actions: [
-        new FlatButton(onPressed: () {
-          Navigator.push(context, new MaterialPageRoute(
-              builder: (context) => new Login()));
-        }, child: new Text("close"))
+        new TextButton(
+            onPressed: () {
+              Navigator.push(context,
+                  new MaterialPageRoute(builder: (context) => new Login()));
+            },
+            child: new Text("close"))
       ],
     );
-
 
     // show the dialog
     showDialog(
@@ -142,7 +123,6 @@ class _PasswordState extends State<password_reset> {
       builder: (BuildContext context) {
         return alert;
       },
-
     );
   }
 }
