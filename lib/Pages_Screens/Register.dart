@@ -6,22 +6,18 @@ import 'package:hazlo/Model/User.dart';
 import 'package:hazlo/Services/Authentication.dart';
 import 'Login.dart';
 
-
 class Register extends StatefulWidget {
   final Function showError;
   final User user;
 
-
-  const Register({Key key, this.showError,this.user}) : super(key: key);
+  const Register({Key key, this.showError, this.user}) : super(key: key);
   @override
   State<StatefulWidget> createState() {
-
     return RegisterState();
   }
 }
 
 class RegisterState extends State<Register> {
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final FocusNode passwordField = FocusNode();
@@ -35,7 +31,6 @@ class RegisterState extends State<Register> {
 
   String confirmpass;
 
-
   @override
   Widget build(BuildContext context) {
     // final user = Provider.of<AuthService>(context);
@@ -45,14 +40,11 @@ class RegisterState extends State<Register> {
             automaticallyImplyLeading: false,
             title: Center(
               child: Text('Register'),
-            )
-        ),
+            )),
         body: Padding(
-
           padding: EdgeInsets.all(10),
           child: Form(
             key: _formKey,
-
             child: ListView(
               children: <Widget>[
                 Container(
@@ -69,14 +61,12 @@ class RegisterState extends State<Register> {
                 //name field
                 Container(
                   padding: EdgeInsets.all(10),
-
                   child: TextFormField(
                     controller: _nameField,
                     validator: (val) {
                       if (val.isEmpty) {
                         return "Name is required";
-                      }
-                      else {
+                      } else {
                         return null;
                       }
                     },
@@ -90,11 +80,9 @@ class RegisterState extends State<Register> {
                   ),
                 ),
 
-
                 // Email Field
                 Container(
                   padding: EdgeInsets.all(10),
-
                   child: TextFormField(
                     controller: _emailField,
                     validator: (val) {
@@ -103,11 +91,9 @@ class RegisterState extends State<Register> {
                       RegExp regExp = new RegExp(pattern);
                       if (val.isEmpty) {
                         return "Email is required";
-                      }
-                      else if (!regExp.hasMatch(val)) {
+                      } else if (!regExp.hasMatch(val)) {
                         return 'Invalid email';
-                      }
-                      else {
+                      } else {
                         return null;
                       }
                     },
@@ -127,15 +113,12 @@ class RegisterState extends State<Register> {
                   child: TextFormField(
                     controller: _passwordField,
                     focusNode: passwordField,
-
                     validator: (val) {
                       if (val.isEmpty) {
                         return "Password is required";
-                      }
-                      else if (val.length < 6) {
+                      } else if (val.length < 6) {
                         return 'Password should be at least 6 characters';
-                      }
-                      else {
+                      } else {
                         return null;
                       }
                     },
@@ -144,12 +127,10 @@ class RegisterState extends State<Register> {
                       border: OutlineInputBorder(),
                       labelText: 'Password',
                     ),
-                    onEditingComplete: () =>
-                        FocusScope.of(context).requestFocus(
-                            confirmPasswordField),
+                    onEditingComplete: () => FocusScope.of(context)
+                        .requestFocus(confirmPasswordField),
                   ),
                 ),
-
 
                 // Confirm Password field
                 Container(
@@ -185,40 +166,42 @@ class RegisterState extends State<Register> {
                 Container(
                   height: 50,
                   padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                  child: RaisedButton(
-                      textColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(30.0)),
-                      color: Color(0xFF005792),
+                  child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          shape: new RoundedRectangleBorder(
+                              borderRadius: new BorderRadius.circular(30.0))
+                      ),
+
                       child: Text('Register'),
                       onPressed: () async {
-                        var user = await FirebaseAuth.instance.currentUser();
+                        await FirebaseAuth.instance.currentUser();
                         try {
                           if (_formKey.currentState.validate()) {
                             if (_confirmPasswordField.text ==
-                                _passwordField.text)
-                              if (!await _auth.registerWithEmailAndPassword(
-                                  _emailField.text, _passwordField.text)) {
-                                widget.showError();
-                              }
+                                _passwordField
+                                    .text)
+                              if (!await _auth
+                                .registerWithEmailAndPassword(
+                                _emailField.text, _passwordField.text)) {
+                              widget.showError();
+                            }
                           } else {
-                            print(
-                                "An error occurred unable to register");
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text('An error occurred unable to register')),
+                            );
+                            print("An error occurred unable to register");
                           }
-                        }
-                        catch (e) {
-                         createRecord();
+                        } catch (e) {
+                          createRecord();
                           print('registration successful');
                           showAboutDialog(context);
                           return false;
                         }
-                      }
-                  ),
+                      }),
                 ),
               ],
             ),
           ),
-
         ));
   }
 
@@ -227,14 +210,13 @@ class RegisterState extends State<Register> {
     var user = await FirebaseAuth.instance.currentUser();
     var uid = user.uid;
     await db.collection('users').document(uid).setData({
-      'name' : _nameField.text,
+      'name': _nameField.text,
       'email': _emailField.text,
-      'password':_passwordField.text,
-       'uid' : uid
+      'password': _passwordField.text,
+      'account' : 'Active',
+      'uid': uid
     });
-
   }
-
 
 // confirm password  validation
   bool validationEqual(String currentValue, String checkValue) {
@@ -248,11 +230,11 @@ class RegisterState extends State<Register> {
 // message box at the end
   showAboutDialog(BuildContext context) {
     // set up the button
-    FlatButton(
+    TextButton(
       child: Text("OK"),
       onPressed: () {
-        Navigator.pop(context, new MaterialPageRoute(
-            builder: (context) => new Login()));
+        Navigator.pop(
+            context, new MaterialPageRoute(builder: (context) => new Login()));
       },
     );
 
@@ -261,10 +243,11 @@ class RegisterState extends State<Register> {
       title: Text("Register Successful!"),
       content: Text("Welcome to Hazlo, lets get it done."),
       actions: [
-        new FlatButton(onPressed: () {
-          Navigator.push(context, new MaterialPageRoute(
-              builder: (context) => new Login()));
-        },
+        new TextButton(
+            onPressed: () {
+              Navigator.push(context,
+                  new MaterialPageRoute(builder: (context) => new Login()));
+            },
             child: new Text("Ok"))
       ],
     );
@@ -276,10 +259,6 @@ class RegisterState extends State<Register> {
       builder: (BuildContext context) {
         return alert;
       },
-
     );
   }
 }
-
-
-
